@@ -10,6 +10,7 @@ const navItems = [
   { href: '/search', label: 'StayKolo PG Locator' },
   { href: '/chronicles', label: 'Chronicles' },
   { href: '/about', label: 'How it works' },
+  { href: '/contact', label: 'Contact Us' },
 ];
 
 export function SiteNav() {
@@ -20,12 +21,19 @@ export function SiteNav() {
       <nav className="hidden items-center gap-7 md:flex" aria-label="Primary navigation">
         {navItems.map((item) => <Link key={item.href} href={item.href} className="text-[13px] font-semibold text-[#4d626f] transition-colors hover:text-[#0878b0]" data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`}>{item.label}</Link>)}
       </nav>
-      <div className="hidden items-center gap-2 md:flex"><Link href="/contact" className="sk-button sk-button-quiet" data-testid="link-list-property">List your property</Link><Link href="/auth/sign-in" className="sk-button sk-button-secondary" data-testid="link-sign-in">Sign in</Link></div>
+      <div className="hidden items-center gap-2 md:flex">
+        <Link href="/contact?tab=verify" className="sk-button sk-button-quiet text-[#0878b0] font-bold border border-[#bde0ee] bg-[#edf7fa] hover:bg-[#d8eef7]" data-testid="link-get-verified">
+          <ShieldCheck size={14} className="text-[#0878b0]" /> Get Verified
+        </Link>
+        <Link href="/auth/sign-in" className="sk-button sk-button-secondary" data-testid="link-sign-in">Sign in</Link>
+      </div>
       <button className="rounded-md p-2 text-[#355364] md:hidden" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} data-testid="button-mobile-menu">{open ? <X size={21} /> : <Menu size={21} />}</button>
     </div>
     {open && <nav className="border-t border-[#e1e8ed] bg-white px-4 py-3 md:hidden" aria-label="Mobile navigation">
       {navItems.map((item) => <Link onClick={() => setOpen(false)} key={item.href} href={item.href} className="block border-b border-[#eef2f4] px-2 py-3 text-sm font-semibold text-[#355364]" data-testid={`mobile-link-${item.label.toLowerCase().replaceAll(' ', '-')}`}>{item.label}</Link>)}
-      <Link onClick={() => setOpen(false)} href="/contact" className="mt-3 block text-sm font-semibold text-[#0878b0]" data-testid="mobile-link-list-property">List your property</Link>
+      <Link onClick={() => setOpen(false)} href="/contact?tab=verify" className="mt-3 block text-sm font-bold text-[#0878b0] flex items-center gap-1.5" data-testid="mobile-link-get-verified">
+        <ShieldCheck size={15} /> Get Verified (List Your PG)
+      </Link>
     </nav>}
   </header>;
 }

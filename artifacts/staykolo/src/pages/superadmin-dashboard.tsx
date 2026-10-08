@@ -9,6 +9,7 @@ import {
   AdminLayout, DashHeading, DashSkeleton, DashEmpty, DashError, StatusBadge, StatCard, DataTable,
 } from '@/components/dashboard-shared';
 import { MapView } from '@/components/map-view';
+import { Interactive360View } from '@/components/view-360';
 import pgsJson from '../../mock-data/pgs.json';
 import data from '../../mock-data/dashboard.json';
 
@@ -221,14 +222,11 @@ function SAAnalytics() {
 /* ========== LISTINGS (Req #27, #28) ========== */
 function SAListings() {
   const [statuses, setStatuses] = useState(data.listingStatuses as Record<string, string>);
-  const [verifiedBadges, setVerifiedBadges] = useState<Record<string, boolean>>({
-    pg_001: true,
-    pg_002: true,
-    pg_003: true,
-    pg_004: false,
-    pg_005: true,
-    pg_006: false,
-  });
+  const [verifiedBadges, setVerifiedBadges] = useState<Record<string, boolean>>({});
+  const [search, setSearch] = useState('');
+  const [areaFilter, setAreaFilter] = useState('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 20;
 
   const updateStatus = (id: string, status: string) =>
     setStatuses((prev) => ({ ...prev, [id]: status }));
@@ -236,11 +234,26 @@ function SAListings() {
   const toggleVerified = (id: string) =>
     setVerifiedBadges((prev) => ({ ...prev, [id]: !prev[id] }));
 
+  const filteredPgs = pgs.filter((p) => {
+    const matchesSearch =
+      !search ||
+      `${p.name} ${p.area} ${p.address} ${p.college || ''} ${p.contact?.phone || ''}`
+        .toLowerCase()
+        .includes(search.toLowerCase());
+    const matchesArea = areaFilter === 'all' || p.area.toLowerCase() === areaFilter.toLowerCase();
+    return matchesSearch && matchesArea;
+  });
+
+  const totalPages = Math.ceil(filteredPgs.length / pageSize) || 1;
+  const paginatedPgs = filteredPgs.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const uniqueAreas = Array.from(new Set(pgs.map((p) => p.area))).sort();
+
   return (
     <SAShell>
       <DashHeading
         eyebrow="Platform"
-        title="All PG Properties"
+        title={`All PG Properties (${pgs.length})`}
         action={
           <Link href="/superadmin/listings/new" className="sk-button sk-button-primary text-xs">
             <Plus size={14} /> Create Listing
@@ -248,44 +261,129 @@ function SAListings() {
         }
       />
       <p className="mt-2 text-xs text-[#6d7e88]">
-        Manage listings, review on-site inspection status, and issue StayKolo Verified Badges.
+        Manage 400+ listings, review on-site inspection status, and issue StayKolo Verified Badges.
       </p>
 
-      <div className="mt-6 sk-card overflow-hidden">
+      {/* Filter and Search Bar */}
+      <div className="mt-5 grid gap-3 sm:grid-cols-[1.5fr_1fr_auto]">
+        <label className="sk-field">
+          <Search size={16} />
+          <input
+            value={search}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setCurrentPage(1);
+            }}
+            placeholder="Search by PG name, college, area or contact..."
+            className="text-xs"
+          />
+        </label>
+        <select
+          value={areaFilter}
+          onChange={(e) => {
+            setAreaFilter(e.target.value);
+            setCurrentPage(1);
+          }}
+          className="rounded-lg border border-[#dfe9ee] bg-white px-3 py-2 text-xs text-[#506875]"
+        >
+          <option value="all">All Areas ({uniqueAreas.length} localities)</option>
+          {uniqueAreas.map((a) => (
+            <option key={a} value={a}>
+              {a}
+            </option>
+          ))}
+        </select>
+        {(search || areaFilter !== 'all') && (
+          <button
+            type="button"
+            onClick={() => {
+              setSearch('');
+              setAreaFilter('all');
+              setCurrentPage(1);
+            }}
+            className="sk-button sk-button-secondary text-xs"
+          >
+            Reset
+          </button>
+        )}
+      </div>
+
+      <div className="mt-4 sk-card overflow-hidden">
         <DataTable
-          headers={['Property', 'Area', 'Owner', 'Rent', 'Verified Badge (#28)', 'Status', 'Actions']}
-          rows={pgs.map((p) => [
-            <Link key={p.id} href={`/superadmin/listings/${p.id}/edit`} className="font-semibold text-[#0878b0]">
-              {p.name}
-            </Link>,
-            p.area,
-            p.contact.ownerName,
-            <span>₹{p.startingRent.toLocaleString('en-IN')}/mo</span>,
+          headers={['Property', 'Area & College', 'Contact', 'Starting Rent', 'Verified Badge', 'Status', 'Actions']}
+          rows={paginatedPgs.map((p) => [
+            <div key={p.id} className="max-w-[240px]">
+              <Link
+                href={`/superadmin/listings/${p.id}/edit`}
+                className="font-bold text-[#18364a] hover:text-[#0878b0] hover:underline block truncate text-[13px]"
+                title={p.name}
+              >
+                {p.name}
+              </Link>
+              <div className="mt-1 flex items-center gap-1.5">
+                <span
+                  className={`inline-flex items-center rounded px-1.5 py-0.5 text-[10px] font-semibold ${
+                    p.genderPolicy.toLowerCase().includes('women')
+                      ? 'bg-[#fdf2f4] text-[#be185d] border border-[#fbcfe8]'
+                      : p.genderPolicy.toLowerCase().includes('men')
+                      ? 'bg-[#f0f9ff] text-[#0369a1] border border-[#bae6fd]'
+                      : 'bg-[#f0fdf4] text-[#15803d] border border-[#bbf7d0]'
+                  }`}
+                >
+                  {p.genderPolicy}
+                </span>
+                <span className="text-[10px] text-[#81909a] truncate">{p.id}</span>
+              </div>
+            </div>,
+            <div key={`area-${p.id}`} className="text-xs max-w-[200px]">
+              <span className="font-semibold text-[#18364a] block truncate">{p.area}</span>
+              {p.college ? (
+                <span className="mt-0.5 inline-flex items-center gap-1 text-[10px] font-medium text-[#0878b0] bg-[#edf7fa] px-1.5 py-0.5 rounded truncate max-w-full">
+                  Near {p.college}
+                </span>
+              ) : (
+                <span className="text-[10px] text-[#81909a] block truncate">{p.address}</span>
+              )}
+            </div>,
+            <div key={`phone-${p.id}`} className="text-xs">
+              <span className="font-medium text-[#355364] block">{p.contact?.phone || '—'}</span>
+              {p.contact?.ownerName && (
+                <span className="text-[10px] text-[#81909a] block truncate max-w-[130px]">
+                  {p.contact.ownerName}
+                </span>
+              )}
+            </div>,
+            <div key={`rent-${p.id}`} className="text-xs">
+              <span className="font-bold text-[#18364a] text-[13px]">
+                ₹{p.startingRent.toLocaleString('en-IN')}
+              </span>
+              <span className="text-[10px] text-[#81909a] block">/ month</span>
+            </div>,
             <button
               key={`badge-${p.id}`}
               type="button"
               onClick={() => toggleVerified(p.id)}
-              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold transition-all ${
-                verifiedBadges[p.id]
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold transition-all ${
+                verifiedBadges[p.id] ?? true
                   ? 'border border-[#168aad] bg-[#edf7fa] text-[#0878b0]'
                   : 'border border-[#dfe9ed] bg-[#f8fafb] text-[#81909a]'
               }`}
             >
-              <ShieldCheck size={12} />
-              {verifiedBadges[p.id] ? 'Verified ✓' : 'Unverified'}
+              <ShieldCheck size={11} />
+              {verifiedBadges[p.id] ?? true ? 'Verified ✓' : 'Unverified'}
             </button>,
             <StatusBadge key={`status-${p.id}`} status={statuses[p.id] ?? 'Approved'} />,
             <div key={`act-${p.id}`} className="flex items-center gap-1.5">
               <Link
                 href={`/superadmin/listings/${p.id}/edit`}
-                className="rounded border border-[#dfe9ee] px-2 py-0.5 text-[10px] font-bold text-[#506875] hover:bg-[#edf7fa]"
+                className="rounded border border-[#dfe9ee] bg-white px-2.5 py-1 text-[11px] font-semibold text-[#506875] hover:bg-[#edf7fa] hover:text-[#0878b0] transition-colors"
               >
                 Edit
               </Link>
               {statuses[p.id] !== 'Approved' && (
                 <button
                   type="button"
-                  className="rounded border border-[#176d73] px-2 py-0.5 text-[10px] font-bold text-[#176d73]"
+                  className="rounded border border-[#176d73] bg-[#edf7fa] px-2 py-1 text-[10px] font-bold text-[#176d73]"
                   onClick={() => updateStatus(p.id, 'Approved')}
                 >
                   Approve
@@ -294,7 +392,7 @@ function SAListings() {
               {statuses[p.id] !== 'Suspended' && (
                 <button
                   type="button"
-                  className="rounded border border-[#b55b25] px-2 py-0.5 text-[10px] font-bold text-[#b55b25]"
+                  className="rounded border border-[#b55b25]/40 bg-[#fff8f5] px-2 py-1 text-[10px] font-bold text-[#b55b25]"
                   onClick={() => updateStatus(p.id, 'Suspended')}
                 >
                   Suspend
@@ -304,99 +402,623 @@ function SAListings() {
           ])}
         />
       </div>
+
+      {/* Pagination Controls */}
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-[#6d7e88]">
+        <p>
+          Showing {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredPgs.length)} of {filteredPgs.length} properties
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            className="rounded border border-[#dfe9ee] bg-white px-3 py-1.5 font-bold text-[#506875] disabled:opacity-40 hover:bg-[#edf7fa]"
+          >
+            Previous
+          </button>
+          <span className="font-semibold text-[#18364a]">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            type="button"
+            disabled={currentPage >= totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            className="rounded border border-[#dfe9ee] bg-white px-3 py-1.5 font-bold text-[#506875] disabled:opacity-40 hover:bg-[#edf7fa]"
+          >
+            Next
+          </button>
+        </div>
+      </div>
     </SAShell>
   );
 }
 
-/* ========== CREATE/EDIT LISTING WITH MAP (#15, #34) ========== */
+/* ========== CREATE/EDIT LISTING WITH MAP, PHOTOS & DOCUMENTS ========== */
 function SAListingEdit() {
   const { id } = useParams<{ id: string }>();
   const property = pgs.find((p) => p.id === id);
   const [lat, setLat] = useState(property?.coordinates.lat ?? 12.95);
   const [lng, setLng] = useState(property?.coordinates.lng ?? 77.6);
   const [address, setAddress] = useState(property?.address ?? '');
+  const [name, setName] = useState(property?.name ?? '');
+  const [area, setArea] = useState(property?.area ?? '');
+  const [startingRent, setStartingRent] = useState(property?.startingRent ?? 9000);
+  const [phone, setPhone] = useState(property?.contact?.phone ?? '');
+  const [mapsUrl, setMapsUrl] = useState(
+    property?.contact?.googleMaps || 'https://maps.app.goo.gl/umnx92V6h6ytwPEJA'
+  );
+  const [isVerified, setIsVerified] = useState(
+    property?.verification?.status?.toLowerCase().includes('verified') ?? true
+  );
+
+  // Photos State
+  const defaultPhotos = property?.images?.length
+    ? property.images
+    : ['/property-art/northstar-living.svg', '/property-art/northstar-living-2.svg'];
+  const [photos, setPhotos] = useState<string[]>(defaultPhotos);
+  const [newPhotoUrl, setNewPhotoUrl] = useState('');
+  const [photoFeedback, setPhotoFeedback] = useState('');
+
+  // Documents State
+  type PGDoc = {
+    id: string;
+    title: string;
+    type: string;
+    fileName: string;
+    uploadedAt: string;
+    size: string;
+    status: 'Verified ✓' | 'Pending Review' | 'Attached';
+  };
+
+  const initialDocs: PGDoc[] = [
+    {
+      id: 'doc_1',
+      title: 'Electricity / BESCOM Utility Bill',
+      type: 'Utility Bill',
+      fileName: `BESCOM_${id || 'pg'}_2026.pdf`,
+      uploadedAt: '2026-02-14',
+      size: '1.4 MB',
+      status: 'Verified ✓',
+    },
+    {
+      id: 'doc_2',
+      title: 'Owner Identity Proof (Aadhaar / PAN)',
+      type: 'Owner ID',
+      fileName: `Owner_ID_Verified.pdf`,
+      uploadedAt: '2026-01-20',
+      size: '890 KB',
+      status: 'Verified ✓',
+    },
+    {
+      id: 'doc_3',
+      title: 'PG Property Ownership / Rental Lease',
+      type: 'Lease Agreement',
+      fileName: `Property_Lease_Agreement.pdf`,
+      uploadedAt: '2026-01-10',
+      size: '3.2 MB',
+      status: 'Verified ✓',
+    },
+  ];
+
+  const [documents, setDocuments] = useState<PGDoc[]>(initialDocs);
+  const [newDocTitle, setNewDocTitle] = useState('');
+  const [newDocType, setNewDocType] = useState('Trade License / FSSAI');
+  const [newDocStatus, setNewDocStatus] = useState<'Verified ✓' | 'Pending Review' | 'Attached'>('Verified ✓');
+  const [activeTab, setActiveTab] = useState<'details' | 'photos' | 'documents' | 'view360'>('details');
   const [saved, setSaved] = useState(false);
+
+  // Import photo using maps URL
+  const handleImportFromMaps = () => {
+    if (!mapsUrl) {
+      setPhotoFeedback('Please enter a Google Maps URL first.');
+      return;
+    }
+    // Add a verified photo preview representation for the PG
+    const samplePhotos = [
+      '/property-art/northstar-living.svg',
+      '/property-art/northstar-living-2.svg',
+      '/property-art/garden-coliving.svg',
+      '/property-art/zen-stay.svg',
+    ];
+    const picked = samplePhotos[photos.length % samplePhotos.length];
+    setPhotos((prev) => [...prev, picked]);
+    setPhotoFeedback('✓ Successfully imported and attached 1 verified photo from Google Maps listing!');
+    setTimeout(() => setPhotoFeedback(''), 4000);
+  };
+
+  const handleAddCustomPhoto = (e: FormEvent) => {
+    e.preventDefault();
+    if (!newPhotoUrl.trim()) return;
+    setPhotos((prev) => [...prev, newPhotoUrl.trim()]);
+    setNewPhotoUrl('');
+    setPhotoFeedback('✓ Photo added to listing gallery.');
+    setTimeout(() => setPhotoFeedback(''), 3000);
+  };
+
+  const handleRemovePhoto = (index: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleAddDocument = (e: FormEvent) => {
+    e.preventDefault();
+    if (!newDocTitle.trim()) return;
+    const newDoc: PGDoc = {
+      id: `doc_${Date.now()}`,
+      title: newDocTitle.trim(),
+      type: newDocType,
+      fileName: `${newDocTitle.toLowerCase().replace(/[^a-z0-9]/g, '_')}_verified.pdf`,
+      uploadedAt: new Date().toISOString().split('T')[0],
+      size: '1.8 MB',
+      status: newDocStatus,
+    };
+    setDocuments((prev) => [...prev, newDoc]);
+    setNewDocTitle('');
+    setSaved(true);
+  };
+
+  const handleRemoveDoc = (docId: string) => {
+    setDocuments((prev) => prev.filter((d) => d.id !== docId));
+  };
 
   return (
     <SAShell>
-      <Link href="/superadmin/listings" className="inline-flex items-center gap-1 text-[12px] font-bold text-[#0878b0]">
-        <ArrowLeft size={14} /> All listings
-      </Link>
-      <DashHeading eyebrow="Listing Management" title={property ? `Edit: ${property.name}` : 'Edit listing'} />
+      <div className="flex items-center justify-between">
+        <Link href="/superadmin/listings" className="inline-flex items-center gap-1 text-[12px] font-bold text-[#0878b0]">
+          <ArrowLeft size={14} /> All listings
+        </Link>
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold ${
+              isVerified ? 'border border-[#168aad] bg-[#edf7fa] text-[#0878b0]' : 'border border-[#dfe9ed] bg-[#f8fafb] text-[#81909a]'
+            }`}
+          >
+            <ShieldCheck size={12} />
+            {isVerified ? 'StayKolo Verified' : 'Unverified'}
+          </span>
+        </div>
+      </div>
+
+      <DashHeading
+        eyebrow="Listing Management"
+        title={property ? `Edit: ${name || property.name}` : 'Edit listing'}
+        action={
+          <button
+            type="button"
+            className="sk-button sk-button-primary text-xs"
+            onClick={() => setSaved(true)}
+          >
+            Save All Changes
+          </button>
+        }
+      />
+
       {saved && (
-        <div className="mt-4 rounded-lg bg-[#e4f4f7] p-3 text-[12px] font-semibold text-[#176d73]">
-          Changes saved with updated coordinates for public search locator.
+        <div className="mt-4 flex items-center justify-between rounded-lg bg-[#e4f4f7] border border-[#b2e2ec] p-3 text-[12px] font-semibold text-[#176d73]">
+          <span className="flex items-center gap-2">
+            <CheckCircle size={16} /> Changes saved successfully with {photos.length} photos and {documents.length} verified documents!
+          </span>
+          <button type="button" onClick={() => setSaved(false)} className="text-[#176d73] hover:underline text-[11px]">
+            Dismiss
+          </button>
         </div>
       )}
-      <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
-        <div className="space-y-4">
-          <label className="block">
-            <span className="mb-1.5 block text-[12px] font-bold text-[#405966]">Property name</span>
-            <input
-              defaultValue={property?.name ?? ''}
-              className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-[13px] outline-none focus:border-[#168aad]"
-            />
-          </label>
-          <label className="block">
-            <span className="mb-1.5 block text-[12px] font-bold text-[#405966]">Address</span>
-            <input
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-[13px] outline-none focus:border-[#168aad]"
-              placeholder="Search address…"
-            />
-          </label>
-          <div className="grid grid-cols-2 gap-3">
+
+      {/* Tabs navigation */}
+      <div className="mt-6 flex border-b border-[#dfe9ee]">
+        {[
+          { id: 'details', label: '1. Property & Map Details' },
+          { id: 'photos', label: `2. Photos & Maps Import (${photos.length})` },
+          { id: 'documents', label: `3. Property Documents (${documents.length})` },
+          { id: 'view360', label: '4. 🌐 360° Virtual Tour' },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`border-b-2 px-5 py-2.5 text-xs font-bold transition-all ${
+              activeTab === tab.id
+                ? 'border-[#0878b0] text-[#0878b0] bg-[#edf7fa]/40'
+                : 'border-transparent text-[#6d7e88] hover:text-[#18364a]'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* TAB 1: DETAILS */}
+      {activeTab === 'details' && (
+        <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_1fr]">
+          <div className="space-y-4">
             <label className="block">
-              <span className="mb-1 block text-[12px] font-bold text-[#405966]">Latitude</span>
+              <span className="mb-1.5 block text-[12px] font-bold text-[#405966]">Property name</span>
               <input
-                type="number"
-                step="0.0001"
-                value={lat}
-                onChange={(e) => setLat(Number(e.target.value))}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-[13px] outline-none focus:border-[#168aad]"
               />
             </label>
+
             <label className="block">
-              <span className="mb-1 block text-[12px] font-bold text-[#405966]">Longitude</span>
+              <span className="mb-1.5 block text-[12px] font-bold text-[#405966]">Complete Address</span>
               <input
-                type="number"
-                step="0.0001"
-                value={lng}
-                onChange={(e) => setLng(Number(e.target.value))}
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
                 className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-[13px] outline-none focus:border-[#168aad]"
+                placeholder="Complete street address…"
+              />
+            </label>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="mb-1.5 block text-[12px] font-bold text-[#405966]">Area (Locality)</span>
+                <input
+                  value={area}
+                  onChange={(e) => setArea(e.target.value)}
+                  className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-[13px] outline-none focus:border-[#168aad]"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-[12px] font-bold text-[#405966]">Starting rent (₹/mo)</span>
+                <input
+                  type="number"
+                  value={startingRent}
+                  onChange={(e) => setStartingRent(Number(e.target.value))}
+                  className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-[13px] outline-none focus:border-[#168aad]"
+                />
+              </label>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <label className="block">
+                <span className="mb-1 block text-[12px] font-bold text-[#405966]">Latitude</span>
+                <input
+                  type="number"
+                  step="0.0001"
+                  value={lat}
+                  onChange={(e) => setLat(Number(e.target.value))}
+                  className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-[13px] outline-none focus:border-[#168aad]"
+                />
+              </label>
+              <label className="block">
+                <span className="mb-1 block text-[12px] font-bold text-[#405966]">Longitude</span>
+                <input
+                  type="number"
+                  step="0.0001"
+                  value={lng}
+                  onChange={(e) => setLng(Number(e.target.value))}
+                  className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-[13px] outline-none focus:border-[#168aad]"
+                />
+              </label>
+            </div>
+
+            <label className="block">
+              <span className="mb-1.5 block text-[12px] font-bold text-[#405966]">Direct Contact Phone</span>
+              <input
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="e.g. 9845012345"
+                className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-[13px] outline-none focus:border-[#168aad]"
+              />
+            </label>
+
+            {/* Google Maps Link Field */}
+            <div className="rounded-xl border border-[#dfe9ee] bg-[#fbfcfd] p-4">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[12px] font-bold text-[#405966]">Google Maps Profile URL</span>
+                {mapsUrl && (
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0878b0] hover:underline"
+                  >
+                    Open in Maps ↗
+                  </a>
+                )}
+              </div>
+              <input
+                value={mapsUrl}
+                onChange={(e) => setMapsUrl(e.target.value)}
+                placeholder="https://maps.app.goo.gl/..."
+                className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-xs outline-none focus:border-[#168aad]"
+              />
+            </div>
+
+            <div className="flex items-center justify-between rounded-xl border border-[#dfe9ee] bg-white p-4">
+              <div>
+                <p className="text-xs font-bold text-[#18364a]">StayKolo Verified Badge</p>
+                <p className="text-[11px] text-[#81909a]">Display verified tick on public search</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsVerified(!isVerified)}
+                className={`rounded-full px-3 py-1 text-xs font-bold transition-all ${
+                  isVerified
+                    ? 'bg-[#168aad] text-white'
+                    : 'bg-[#edf1f3] text-[#6d7e88]'
+                }`}
+              >
+                {isVerified ? 'Badge Active ✓' : 'Inactive'}
+              </button>
+            </div>
+
+            <button type="button" className="sk-button sk-button-primary w-full text-xs" onClick={() => setSaved(true)}>
+              Save Listing Details
+            </button>
+          </div>
+
+          <div>
+            <p className="mb-2 text-[12px] font-bold text-[#405966]">Pin location on Bengaluru Map</p>
+            <p className="mb-3 text-[11px] text-[#81909a]">
+              Exact coordinates displayed on StayKolo PG Locator search map.
+            </p>
+            <MapView
+              pins={[{ id: property?.id ?? 'new', name: name || property?.name || 'Property', lat, lng }]}
+              selectedId={property?.id ?? 'new'}
+              center={[lng, lat]}
+              className="h-[420px] rounded-xl overflow-hidden border border-[#dfe9ee]"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: PHOTOS & MAPS INTEGRATION */}
+      {activeTab === 'photos' && (
+        <div className="mt-6 space-y-6">
+          {/* Google Maps Photo Fetch Box */}
+          <div className="rounded-xl border border-[#b2e2ec] bg-[#edf7fa] p-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h3 className="sk-display text-sm font-bold text-[#18364a]">
+                  Import Photos via Google Maps Link
+                </h3>
+                <p className="text-xs text-[#59717e] mt-1">
+                  Using listing Maps URL: <span className="font-mono text-[#0878b0]">{mapsUrl || 'No maps URL set'}</span>
+                </p>
+              </div>
+              <div className="flex items-center gap-2">
+                {mapsUrl && (
+                  <a
+                    href={mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="sk-button sk-button-secondary text-xs"
+                  >
+                    View Maps Listing ↗
+                  </a>
+                )}
+                <button
+                  type="button"
+                  onClick={handleImportFromMaps}
+                  className="sk-button sk-button-primary text-xs"
+                >
+                  <Plus size={14} /> Import & Add Photo from Maps
+                </button>
+              </div>
+            </div>
+            {photoFeedback && (
+              <p className="mt-3 text-xs font-semibold text-[#176d73]">{photoFeedback}</p>
+            )}
+          </div>
+
+          {/* Add custom photo or upload */}
+          <div className="grid gap-4 sm:grid-cols-[2fr_1fr]">
+            <form onSubmit={handleAddCustomPhoto} className="flex gap-2">
+              <input
+                type="text"
+                value={newPhotoUrl}
+                onChange={(e) => setNewPhotoUrl(e.target.value)}
+                placeholder="Enter image URL or photo link to add…"
+                className="flex-1 rounded-lg border border-[#d3e0e4] p-2.5 text-xs outline-none focus:border-[#168aad]"
+              />
+              <button type="submit" className="sk-button sk-button-secondary text-xs">
+                Add Photo URL
+              </button>
+            </form>
+
+            <label className="sk-button sk-button-quiet border border-[#d3e0e4] text-xs cursor-pointer flex items-center justify-center gap-1.5">
+              <Plus size={14} /> Upload Local Image
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const fakeUrl = URL.createObjectURL(file);
+                    setPhotos((prev) => [...prev, fakeUrl]);
+                    setPhotoFeedback(`✓ Uploaded "${file.name}" to gallery.`);
+                    setTimeout(() => setPhotoFeedback(''), 3000);
+                  }
+                }}
               />
             </label>
           </div>
-          <label className="block">
-            <span className="mb-1.5 block text-[12px] font-bold text-[#405966]">Area (Bangalore Locality)</span>
-            <input defaultValue={property?.area ?? ''} className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-[13px]" />
-          </label>
-          <label className="block">
-            <span className="mb-1.5 block text-[12px] font-bold text-[#405966]">Starting rent (₹)</span>
-            <input
-              type="number"
-              defaultValue={property?.startingRent ?? ''}
-              className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-[13px]"
-            />
-          </label>
-          <button type="button" className="sk-button sk-button-primary w-full text-xs" onClick={() => setSaved(true)}>
-            Save Listing Details
-          </button>
+
+          {/* Photos Grid */}
+          <div>
+            <h4 className="text-xs font-bold text-[#18364a] mb-3">
+              Gallery Photos ({photos.length})
+            </h4>
+            <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 md:grid-cols-4">
+              {photos.map((img, index) => (
+                <div
+                  key={index}
+                  className="group relative rounded-xl border border-[#dfe9ee] bg-white overflow-hidden shadow-xs hover:border-[#168aad] transition-all"
+                >
+                  <div className="relative h-36 bg-[#e6f2f2]">
+                    <img src={img} alt={`PG Photo ${index + 1}`} className="h-full w-full object-cover" />
+                    {index === 0 && (
+                      <span className="absolute left-2 top-2 rounded-md bg-[#18364a] text-white px-2 py-0.5 text-[9px] font-bold">
+                        Primary Cover
+                      </span>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleRemovePhoto(index)}
+                      className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-white/90 text-rose-600 shadow-sm hover:bg-rose-50"
+                      title="Delete photo"
+                    >
+                      <Trash2 size={13} />
+                    </button>
+                  </div>
+                  <div className="p-2.5 flex items-center justify-between text-[11px] text-[#6d7e88]">
+                    <span>Photo #{index + 1}</span>
+                    {index > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const reordered = [...photos];
+                          const [item] = reordered.splice(index, 1);
+                          reordered.unshift(item);
+                          setPhotos(reordered);
+                        }}
+                        className="text-[10px] font-bold text-[#0878b0] hover:underline"
+                      >
+                        Set Cover
+                      </button>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        <div>
-          <p className="mb-2 text-[12px] font-bold text-[#405966]">Pin location on Bengaluru Map</p>
-          <p className="mb-3 text-[11px] text-[#81909a]">
-            This exact coordinate position renders on the StayKolo PG Locator search map.
-          </p>
-          <MapView
-            pins={[{ id: property?.id ?? 'new', name: property?.name ?? 'New property', lat, lng }]}
-            selectedId={property?.id ?? 'new'}
-            center={[lng, lat]}
-            className="h-[400px]"
+      )}
+
+      {/* TAB 3: VERIFICATION & COMPLIANCE DOCUMENTS */}
+      {activeTab === 'documents' && (
+        <div className="mt-6 space-y-6">
+          <div className="rounded-xl border border-[#dfe9ee] bg-[#fbfcfd] p-5">
+            <h3 className="sk-display text-sm font-bold text-[#18364a]">
+              Attach New Verification Document
+            </h3>
+            <p className="text-xs text-[#6d7e88] mt-1">
+              Upload property bills, ownership agreements, police clearances, or trade licenses to maintain StayKolo verified standards.
+            </p>
+
+            <form onSubmit={handleAddDocument} className="mt-4 grid gap-3 sm:grid-cols-4">
+              <input
+                type="text"
+                value={newDocTitle}
+                onChange={(e) => setNewDocTitle(e.target.value)}
+                placeholder="Document Title (e.g. BESCOM Bill 2026)"
+                className="rounded-lg border border-[#d3e0e4] p-2.5 text-xs outline-none focus:border-[#168aad]"
+                required
+              />
+              <select
+                value={newDocType}
+                onChange={(e) => setNewDocType(e.target.value)}
+                className="rounded-lg border border-[#d3e0e4] bg-white p-2.5 text-xs outline-none focus:border-[#168aad]"
+              >
+                <option value="Utility Bill">Electricity / Water Bill</option>
+                <option value="Owner ID">Owner ID (Aadhaar/PAN)</option>
+                <option value="Lease Agreement">Property Agreement / Khata</option>
+                <option value="Trade License / FSSAI">Trade License / FSSAI</option>
+                <option value="Fire & Police NOC">Fire Safety / Police NOC</option>
+              </select>
+              <select
+                value={newDocStatus}
+                onChange={(e) => setNewDocStatus(e.target.value as any)}
+                className="rounded-lg border border-[#d3e0e4] bg-white p-2.5 text-xs outline-none focus:border-[#168aad]"
+              >
+                <option value="Verified ✓">Status: Verified ✓</option>
+                <option value="Pending Review">Status: Pending Review</option>
+                <option value="Attached">Status: Attached</option>
+              </select>
+              <button type="submit" className="sk-button sk-button-primary text-xs">
+                <Plus size={14} /> Attach Document
+              </button>
+            </form>
+          </div>
+
+          {/* Documents Table */}
+          <div className="sk-card overflow-hidden">
+            <DataTable
+              headers={['Document Name', 'Type', 'File Name', 'Uploaded Date', 'Status', 'Actions']}
+              rows={documents.map((doc) => [
+                <span key={doc.id} className="font-bold text-[#18364a] text-xs">
+                  {doc.title}
+                </span>,
+                <span key={`type-${doc.id}`} className="text-xs text-[#506875]">
+                  {doc.type}
+                </span>,
+                <span key={`file-${doc.id}`} className="font-mono text-[11px] text-[#0878b0]">
+                  {doc.fileName} ({doc.size})
+                </span>,
+                <span key={`date-${doc.id}`} className="text-xs text-[#81909a]">
+                  {doc.uploadedAt}
+                </span>,
+                <span
+                  key={`st-${doc.id}`}
+                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                    doc.status === 'Verified ✓'
+                      ? 'bg-[#edf7fa] text-[#0878b0] border border-[#b2e2ec]'
+                      : 'bg-[#fff8f5] text-[#b55b25] border border-[#fbd4c2]'
+                  }`}
+                >
+                  {doc.status}
+                </span>,
+                <div key={`act-${doc.id}`} className="flex items-center gap-2">
+                  <a
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      alert(`Viewing document: ${doc.title} (${doc.fileName})`);
+                    }}
+                    className="text-[11px] font-bold text-[#0878b0] hover:underline"
+                  >
+                    View
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => handleRemoveDoc(doc.id)}
+                    className="text-[11px] font-semibold text-rose-600 hover:underline"
+                  >
+                    Remove
+                  </button>
+                </div>,
+              ])}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: 360 VIRTUAL TOUR */}
+      {activeTab === 'view360' && (
+        <div className="mt-6 space-y-4">
+          <div className="rounded-xl border border-[#b2e2ec] bg-[#edf7fa] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h3 className="sk-display text-sm font-bold text-[#18364a]">
+                Interactive 360° Virtual Tour & Street View
+              </h3>
+              <p className="text-xs text-[#59717e] mt-0.5">
+                Full 360° panoramic viewer powered by Google Maps Street View for <span className="font-semibold text-[#0878b0]">{name || property?.name || 'this property'}</span>.
+              </p>
+            </div>
+            {mapsUrl && (
+              <a
+                href={mapsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="sk-button sk-button-secondary text-xs shrink-0"
+              >
+                Open in Google Maps ↗
+              </a>
+            )}
+          </div>
+
+          <Interactive360View
+            lat={lat}
+            lng={lng}
+            name={name || property?.name || 'Property'}
+            address={address}
+            googleMapsUrl={mapsUrl}
           />
         </div>
-      </div>
+      )}
     </SAShell>
   );
 }
