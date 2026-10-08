@@ -86,7 +86,7 @@ export function SiteFooter() {
         {/* Karnataka flag — Brand Karnataka (#16) */}
         <BrandKarnatakaBadge />
       </div>
-      <span>PG findings made easy in Bangalore · Phase 1</span>
+      <span>PG findings made easy in Bengaluru · First phase launch</span>
     </div>
   </footer>;
 }
@@ -131,5 +131,5 @@ export function StateShowcase() {
 }
 
 export function ComingSoon({ title }: { title: string }) {
-  return <main className="sk-container flex min-h-[60vh] items-center py-16"><div className="max-w-[560px]"><p className="sk-eyebrow">Phase 1 foundation</p><h1 className="sk-display mt-3 text-[38px] font-bold leading-tight text-[#18364a]">{title}</h1><p className="mt-4 text-[16px] leading-7 text-[#647782]">This screen is mapped into Staykolo’s navigation and will be designed in a future phase. The foundation is ready for it.</p><Link href="/" className="sk-button sk-button-primary mt-7" data-testid="link-return-home">Return to home <ArrowRight size={16} /></Link></div></main>;
+  return <main className="sk-container flex min-h-[60vh] items-center py-16"><div className="max-w-[560px]"><p className="sk-eyebrow">Foundation launch</p><h1 className="sk-display mt-3 text-[38px] font-bold leading-tight text-[#18364a]">{title}</h1><p className="mt-4 text-[16px] leading-7 text-[#647782]">This screen is part of the first phase of StayKolo and is being prepared for the next rollout step.</p><Link href="/" className="sk-button sk-button-primary mt-7" data-testid="link-return-home">Return to home <ArrowRight size={16} /></Link></div></main>;
 }

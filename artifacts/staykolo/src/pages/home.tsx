@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ArrowRight, Check, Compass, MapPin, Search, ShieldCheck, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, Compass, GraduationCap, MapPin, Search, ShieldCheck, Sparkles } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { KarnatakaFlag, SectionHeading, SiteFooter, SiteNav } from '@/components/staykolo-ui';
 import { Modal360 } from '@/components/view-360';

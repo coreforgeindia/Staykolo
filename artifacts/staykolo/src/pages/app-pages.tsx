@@ -67,7 +67,7 @@ function PropertyCardFull({
         </span>
         {/* 25% Offer Badge (#50) */}
         <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#b55b25] px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
-          <Gift size={11} /> 25% Off 1st Mo*
+          <Gift size={11} /> Verified PG Offer
         </span>
 
         {/* 360 Virtual Tour Button */}
@@ -368,7 +368,7 @@ export function SearchPage() {
   return (
     <Shell>
       <main>
-        {/* Banner with 25% Off + Phase 1 Bengaluru info (#17, #50) */}
+        {/* Banner with verified PG savings and Bengaluru search */}
         <section className="border-b border-[#dfe9ee] bg-[#edf7fa]">
           <div className="sk-container py-10 sm:py-14">
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -383,10 +383,10 @@ export function SearchPage() {
               </div>
               <div className="rounded-xl border border-[#0878b0]/30 bg-white p-3 shadow-sm text-xs">
                 <span className="flex items-center gap-1.5 font-bold text-[#b55b25]">
-                  <Gift size={14} /> 25% Off 1st Month Offer
+                  <Gift size={14} /> 25% Off on Verified PGs
                 </span>
                 <p className="text-[#647782] mt-0.5 max-w-[260px]">
-                  Contact verified PGs directly on StayKolo to claim your move-in discount.
+                  Available only when you connect with a StayKolo verified PG.
                 </p>
               </div>
             </div>
@@ -1184,10 +1184,10 @@ export function PropertyDetail() {
               <div className="sk-card sticky top-5 p-5">
                 <div className="rounded-lg bg-[#fff8f5] border border-[#fbd4c2] p-3 mb-4">
                   <p className="text-xs font-bold text-[#b55b25] flex items-center gap-1.5">
-                    <Gift size={14} /> 25% Off 1st Month Rent
+                    <Gift size={14} /> 25% Off on Verified PGs
                   </p>
                   <p className="text-[11px] text-[#647782] mt-1">
-                    Apply via StayKolo below to claim your verified discount.
+                    Available only when you apply to a StayKolo verified PG.
                   </p>
                 </div>
                 <p className="text-[12px] font-bold uppercase tracking-[.12em] text-[#81909a]">Interested in this PG?</p>
@@ -1488,6 +1488,7 @@ export function LoginPage() {
 export function SignupPage() {
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
+  const [role, setRole] = useState<'tenant' | 'owner'>('tenant');
   const [password, setPassword] = useState('');
   const [terms, setTerms] = useState(false);
   const [privacy, setPrivacy] = useState(false);
@@ -1509,7 +1510,7 @@ export function SignupPage() {
         JSON.stringify({
           name,
           contact,
-          role: 'tenant',
+          role,
           consent: [
             { agreedDocument: 'terms', version: '2026-09-26', timestamp: now },
             { agreedDocument: 'privacy', version: '2026-09-26', timestamp: now },
@@ -1529,14 +1530,38 @@ export function SignupPage() {
       <p className="sk-eyebrow">Create account</p>
       <h2 className="sk-display mt-2 text-[26px] font-bold text-[#18364a]">Create your account</h2>
       <p className="text-xs text-[#506875] mt-1">Sign up with your phone number to get started with StayKolo.</p>
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        <button
+          type="button"
+          className={`rounded-lg border p-3.5 text-left ${
+            role === 'tenant' ? 'border-[#168aad] bg-[#edf7fa]' : 'border-[#d9e4e8] bg-white'
+          }`}
+          onClick={() => setRole('tenant')}
+        >
+          <UserRound size={17} className="text-[#0878b0]" />
+          <span className="mt-2 block text-xs font-bold text-[#355364]">PG Seeker / Tenant</span>
+          <span className="mt-0.5 block text-[11px] text-[#778891]">Compare stays, get 25% off verified PGs.</span>
+        </button>
+        <button
+          type="button"
+          className={`rounded-lg border p-3.5 text-left ${
+            role === 'owner' ? 'border-[#168aad] bg-[#edf7fa]' : 'border-[#d9e4e8] bg-white'
+          }`}
+          onClick={() => setRole('owner')}
+        >
+          <Home size={17} className="text-[#0878b0]" />
+          <span className="mt-2 block text-xs font-bold text-[#355364]">PG Owner / Admin</span>
+          <span className="mt-0.5 block text-[11px] text-[#778891]">List property &amp; manage tenants.</span>
+        </button>
+      </div>
 
       {state === 'success' ? (
         <div className="mt-6 rounded-lg bg-[#edf7fa] p-5 text-center">
           <Check className="mx-auto text-[#168aad]" size={24} />
           <h3 className="sk-display mt-3 text-lg font-bold text-[#18364a]">Account Created</h3>
           <p className="mt-1 text-xs text-[#6d7e88]">Your UID ({contact}) is registered.</p>
-          <Link href="/tenant/home" className="sk-button sk-button-primary mt-4 text-xs">
-            Continue to Portal
+          <Link href={role === 'owner' ? '/admin/overview' : '/tenant/home'} className="sk-button sk-button-primary mt-4 text-xs">
+            Continue to {role === 'owner' ? 'Owner' : 'Tenant'} Portal
           </Link>
         </div>
       ) : (
@@ -1796,7 +1821,7 @@ export function AboutPage() {
               All at one click. The complete PG ecosystem.
             </h1>
             <p className="mt-4 max-w-[620px] text-[16px] leading-7 text-[#59717e]">
-              StayKolo connects PG seekers, tenants, staff, and owners across Bengaluru with verified amenities, direct owner contacts, zero broker fees, and 25% first-month savings.
+              StayKolo is a Bengaluru-first way to discover better PGs with direct owner contact, verified details, and a simpler decision process. This is the first phase introduction of the platform.
             </p>
           </div>
         </section>
@@ -1816,9 +1841,9 @@ export function AboutPage() {
               <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#fff8f5] text-[#b55b25] mb-4">
                 <Gift size={22} />
               </span>
-              <h3 className="sk-display text-lg font-bold text-[#18364a]">25% Off 1st Month</h3>
+              <h3 className="sk-display text-lg font-bold text-[#18364a]">25% Off on Verified PGs</h3>
               <p className="mt-2 text-xs leading-relaxed text-[#6d7e88]">
-                Claim exclusive move-in savings when applying through the StayKolo platform for verified PG partners.
+                Available only when you apply through a StayKolo verified PG partner in the first phase rollout.
               </p>
             </div>
             <div className="sk-card p-6">
@@ -1833,7 +1858,7 @@ export function AboutPage() {
           </div>
 
           <div className="mt-12 sk-card p-8 bg-gradient-to-r from-[#edf7fa] to-[#f5fafc]">
-            <p className="sk-eyebrow">Phase 1 Bengaluru Corridors</p>
+            <p className="sk-eyebrow">Bengaluru coverage</p>
             <h2 className="sk-display mt-2 text-2xl font-bold text-[#18364a]">Built for tech commutes and college hubs.</h2>
             <p className="mt-2 text-xs leading-relaxed text-[#6d7e88] max-w-[650px]">
               Currently serving HSR Layout, Koramangala, Bellandur, Indiranagar, Whitefield, Marathahalli, and Electronic City with localized daily food menus, visitor management, and Wi-Fi provisioning.

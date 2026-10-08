@@ -1268,7 +1268,7 @@ function UserSaved() {
               </span>
             </div>
             <p className="mt-3 text-xs text-[#6d7e88]">
-              25% off 1st month discount eligible · Verified Profile
+              25% off on verified PGs · Verified Profile
             </p>
             <div className="mt-4 flex gap-2">
               <Link href="/pg/orchid-house-hsr" className="sk-button sk-button-primary text-xs flex-1">
