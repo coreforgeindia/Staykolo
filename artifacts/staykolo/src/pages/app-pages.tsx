@@ -1,11 +1,12 @@
 import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
 import {
-  ArrowLeft, ArrowRight, Check, CheckCircle, ChevronDown, CircleAlert, Eye, EyeOff, FileText,
-  Gift, Heart, Home, Info, Mail, MapPin, Phone, RotateCcw, Scale, Search, ShieldCheck,
+  ArrowLeft, ArrowRight, Check, CheckCircle, ChevronDown, CircleAlert, Compass, ExternalLink, Eye, EyeOff, FileText,
+  Gift, GraduationCap, Heart, Home, Info, Mail, MapPin, Navigation, Phone, RotateCcw, Scale, Search, ShieldCheck,
   SlidersHorizontal, Sparkles, User, UserCheck, UserRound, Users, Wrench, X,
 } from 'lucide-react';
 import { MapView } from '@/components/map-view';
+import { Interactive360View, Modal360 } from '@/components/view-360';
 import { BrandKarnatakaBadge, KarnatakaFlag, SectionHeading, SiteFooter, SiteNav } from '@/components/staykolo-ui';
 import pgsJson from '../../mock-data/pgs.json';
 
@@ -43,6 +44,8 @@ function PropertyCardFull({
   isLiked?: boolean;
   onToggleLike?: () => void;
 }) {
+  const [show360, setShow360] = useState(false);
+
   return (
     <article
       className={`sk-card overflow-hidden transition-all duration-200 hover:-translate-y-0.5 ${
@@ -66,6 +69,20 @@ function PropertyCardFull({
         <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#b55b25] px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
           <Gift size={11} /> 25% Off 1st Mo*
         </span>
+
+        {/* 360 Virtual Tour Button */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setShow360(true);
+          }}
+          className="absolute bottom-3 right-12 inline-flex items-center gap-1 rounded-full bg-black/75 backdrop-blur-xs px-2.5 py-1 text-[10px] font-bold text-white shadow hover:bg-[#0878b0] transition-colors"
+          title="Open 360° Virtual Tour"
+        >
+          <Compass size={11} className="text-cyan-400" /> 360° Tour
+        </button>
+
         {/* Like Button (#40) */}
         {onToggleLike && (
           <button
@@ -81,6 +98,17 @@ function PropertyCardFull({
           </button>
         )}
       </div>
+
+      <Modal360
+        isOpen={show360}
+        onClose={() => setShow360(false)}
+        property={{
+          name: property.name,
+          address: property.address,
+          coordinates: property.coordinates,
+          contact: property.contact,
+        }}
+      />
       <button
         type="button"
         className="block w-full text-left p-4"
@@ -94,6 +122,11 @@ function PropertyCardFull({
               <MapPin size={13} />
               {property.area}
             </p>
+            {property.college && (
+              <span className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-[#0878b0] bg-[#edf7fa] px-2 py-0.5 rounded">
+                <GraduationCap size={12} /> Near {property.college}
+              </span>
+            )}
           </div>
           <div className="text-right text-[13px] font-bold text-[#18364a]">
             <Money value={property.startingRent} />
@@ -113,10 +146,44 @@ function PropertyCardFull({
         >
           View details &amp; verify amenities <ArrowRight size={13} />
         </Link>
-        <span className="text-[10px] text-[#81909a]">Ecosystem transfer ready</span>
+        {property.contact?.phone && (
+          <span className="text-[11px] text-[#506875] font-semibold flex items-center gap-1">
+            <Phone size={12} className="text-[#168aad]" /> {property.contact.phone}
+          </span>
+        )}
       </div>
     </article>
   );
+}
+
+// Smart query matcher: handles natural inputs like "pgs near pes university", "pg near vijaynagar", "boys pg in mathikere"
+function matchPGQuery(p: PG, query: string): boolean {
+  if (!query || !query.trim()) return true;
+  
+  const raw = query.toLowerCase().trim();
+  const cleaned = raw
+    .replace(/\b(pg'?s?|hostels?|stays?|rooms?|living|paying\s*guest)\b/gi, '')
+    .replace(/\b(near|in|at|around|close\s*to|by|for)\b/gi, '')
+    .replace(/[^a-z0-9\s]/gi, ' ')
+    .trim();
+  
+  const tokens = (cleaned || raw).split(/\s+/).filter((t) => t.length > 0);
+  
+  const targetText = [
+    p.name,
+    p.area,
+    p.address,
+    p.college || '',
+    p.collegeHeader || '',
+    ...(p.nearbyLandmarks || []),
+    ...(p.searchKeywords || []),
+  ]
+    .join(' ')
+    .toLowerCase();
+
+  if (cleaned && targetText.includes(cleaned)) return true;
+
+  return tokens.every((token) => targetText.includes(token));
 }
 
 function Field({
@@ -223,16 +290,18 @@ function Modal({
 /* ========== SEARCH PAGE (Req #1, #40, #41, #42, #43, #50, #36) ========== */
 export function SearchPage() {
   const [location] = useLocation();
-  const initialArea = new URLSearchParams(location.split('?')[1] ?? '').get('area') ?? '';
-  const [area, setArea] = useState(initialArea);
+  const searchParams = new URLSearchParams(location.split('?')[1] ?? '');
+  const initialQuery = searchParams.get('q') || searchParams.get('area') || '';
+  const [query, setQuery] = useState(initialQuery);
   const [price, setPrice] = useState('any');
   const [gender, setGender] = useState('any');
   const [room, setRoom] = useState('any');
   const [amenities, setAmenities] = useState<string[]>([]);
-  const [selected, setSelected] = useState(pgs[0].id);
+  const [selected, setSelected] = useState(pgs[0]?.id || 'pg_001');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [mobileTab, setMobileTab] = useState<'list' | 'map'>('list');
+  const [visibleCount, setVisibleCount] = useState(20);
 
   // Liked PGs state (Req #40)
   const [likedIds, setLikedIds] = useState<string[]>(() => {
@@ -244,13 +313,12 @@ export function SearchPage() {
   });
   const [viewLikedOnly, setViewLikedOnly] = useState(false);
   const [compareModal, setCompareModal] = useState(false);
-  const [accountPromptModal, setAccountPromptModal] = useState(false);
 
   // User auth state simulation
   const [isLoggedIn] = useState(() => Boolean(localStorage.getItem('staykolo.mockUser')));
 
   useEffect(() => {
-    const timer = window.setTimeout(() => setLoading(false), 400);
+    const timer = window.setTimeout(() => setLoading(false), 200);
     return () => window.clearTimeout(timer);
   }, []);
 
@@ -265,7 +333,7 @@ export function SearchPage() {
   const filtered = useMemo(() => {
     return pgs.filter((p) => {
       if (viewLikedOnly && !likedIds.includes(p.id)) return false;
-      const areaMatch = !area || `${p.area} ${p.name}`.toLowerCase().includes(area.toLowerCase());
+      const queryMatch = matchPGQuery(p, query);
       const priceMatch =
         price === 'any' ||
         (price === 'under-13'
@@ -276,13 +344,17 @@ export function SearchPage() {
       const genderMatch = gender === 'any' || p.genderPolicy === gender;
       const roomMatch = room === 'any' || p.roomTypes.some((r) => r.toLowerCase().includes(room));
       const amenityMatch = amenities.every((a) => p.amenities.includes(a));
-      return areaMatch && priceMatch && genderMatch && roomMatch && amenityMatch;
+      return queryMatch && priceMatch && genderMatch && roomMatch && amenityMatch;
     });
-  }, [area, price, gender, room, amenities, viewLikedOnly, likedIds]);
+  }, [query, price, gender, room, amenities, viewLikedOnly, likedIds]);
 
-  // Req #1: Non-logged in users see first 5 PGs
-  const displayedProperties = !isLoggedIn && !viewLikedOnly ? filtered.slice(0, 5) : filtered;
+  // Non-logged in users see first 5 PGs, logged in see paginated list
+  const displayedProperties = !isLoggedIn && !viewLikedOnly
+    ? filtered.slice(0, 5)
+    : filtered.slice(0, visibleCount);
+
   const hasMoreUnauthenticated = !isLoggedIn && !viewLikedOnly && filtered.length > 5;
+  const hasMorePaginated = (isLoggedIn || viewLikedOnly) && visibleCount < filtered.length;
 
   const visiblePins = displayedProperties.map((p) => ({
     id: p.id,
@@ -303,10 +375,10 @@ export function SearchPage() {
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
                   <KarnatakaFlag className="h-3.5 w-5" />
-                  <p className="sk-eyebrow">StayKolo PG Locator · Phase 1 Bengaluru</p>
+                  <p className="sk-eyebrow">StayKolo PG Locator · 400+ Verified PGs in Bengaluru</p>
                 </div>
                 <h1 className="sk-display mt-2 text-[32px] font-bold text-[#18364a] sm:text-[42px]">
-                  Search Bengaluru by the details that matter.
+                  Search Bengaluru by colleges, areas, or landmarks.
                 </h1>
               </div>
               <div className="rounded-xl border border-[#0878b0]/30 bg-white p-3 shadow-sm text-xs">
@@ -319,23 +391,36 @@ export function SearchPage() {
               </div>
             </div>
 
-            {/* Smart Suggestions Bar (Req #36) */}
+            {/* Smart Suggestions Bar (Colleges & Key Hubs) */}
             <div className="mt-5 flex flex-wrap items-center gap-2 text-xs">
               <span className="flex items-center gap-1 font-bold text-[#476772]">
-                <Sparkles size={13} className="text-[#168aad]" /> Suggestions:
+                <Sparkles size={13} className="text-[#168aad]" /> Quick Hubs:
               </span>
               {[
-                { label: 'HSR Layout Corridors', fn: () => setArea('HSR') },
-                { label: 'Koramangala Tech Hub', fn: () => setArea('Koramangala') },
-                { label: 'Budget Under ₹13k', fn: () => setPrice('under-13') },
-                { label: 'Private Rooms', fn: () => setRoom('private') },
-                { label: 'Co-living Spaces', fn: () => setGender('Co-living') },
+                { label: 'PES University', q: 'PES University' },
+                { label: 'Vijaynagar', q: 'Vijaynagar' },
+                { label: 'MS Ramaiah (MSRIT)', q: 'MS Ramaiah' },
+                { label: 'Nagarbhavi', q: 'Nagarbhavi' },
+                { label: 'IISC Bangalore', q: 'IISC' },
+                { label: 'Christ University', q: 'Christ University' },
+                { label: 'BMSCE Basavanagudi', q: 'BMSCE' },
+                { label: 'RV College (RVCE)', q: 'RVCE' },
+                { label: 'Dayananda Sagar (DSCE)', q: 'DSCE' },
+                { label: 'Koramangala', q: 'Koramangala' },
+                { label: 'Malleshwaram', q: 'Malleshwaram' },
               ].map((sug) => (
                 <button
                   key={sug.label}
                   type="button"
-                  onClick={sug.fn}
-                  className="rounded-full border border-[#d3e0e4] bg-white px-3 py-1 text-[#476772] hover:border-[#168aad] hover:bg-[#edf7fa]"
+                  onClick={() => {
+                    setQuery(sug.q);
+                    setVisibleCount(20);
+                  }}
+                  className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
+                    query === sug.q
+                      ? 'border-[#168aad] bg-[#168aad] text-white'
+                      : 'border-[#d3e0e4] bg-white text-[#476772] hover:border-[#168aad] hover:bg-[#edf7fa]'
+                  }`}
                 >
                   {sug.label}
                 </button>
@@ -346,12 +431,15 @@ export function SearchPage() {
             <div className="mt-6 sk-card grid gap-3 p-3 md:grid-cols-[1.3fr_1fr_1fr_auto]">
               <label className="sk-field">
                 <Search size={17} />
-                <span className="sr-only">Area or landmark</span>
+                <span className="sr-only">Search by college, area, or landmark</span>
                 <input
-                  value={area}
-                  onChange={(e) => setArea(e.target.value)}
-                  placeholder="Area or landmark"
-                  aria-label="Area or landmark"
+                  value={query}
+                  onChange={(e) => {
+                    setQuery(e.target.value);
+                    setVisibleCount(20);
+                  }}
+                  placeholder="e.g. 'PGs near PES University' or 'Vijaynagar'"
+                  aria-label="Search by college, area, or landmark"
                   data-testid="input-search-area"
                 />
               </label>
@@ -391,12 +479,13 @@ export function SearchPage() {
                 type="button"
                 className="sk-button sk-button-primary"
                 onClick={() => {
-                  setArea('');
+                  setQuery('');
                   setPrice('any');
                   setGender('any');
                   setRoom('any');
                   setAmenities([]);
                   setViewLikedOnly(false);
+                  setVisibleCount(20);
                 }}
                 data-testid="button-clear-filters"
               >
@@ -440,7 +529,7 @@ export function SearchPage() {
 
           <div className="grid gap-6 lg:grid-cols-[minmax(360px,0.86fr)_1.14fr]">
             <aside className={mobileTab === 'map' ? 'hidden lg:block' : 'block'}>
-              {/* Liked & Compare Header Bar (Req #40, #43) */}
+              {/* Liked & Compare Header Bar */}
               <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="sk-eyebrow">Available profiles</p>
@@ -449,7 +538,7 @@ export function SearchPage() {
                       ? 'Checking profiles'
                       : viewLikedOnly
                       ? `${filtered.length} Liked Properties`
-                      : `${filtered.length} properties found`}
+                      : `${filtered.length} properties found ${query ? `for "${query}"` : ''}`}
                   </h2>
                 </div>
                 <div className="flex items-center gap-2">
@@ -493,9 +582,10 @@ export function SearchPage() {
                       data-testid="select-search-room"
                     >
                       <option value="any">Any room type</option>
-                      <option value="private">Private room</option>
+                      <option value="single">Single room</option>
                       <option value="twin">Twin sharing</option>
                       <option value="triple">Triple sharing</option>
+                      <option value="four">Four sharing</option>
                     </select>
                     <ChevronDown size={13} />
                   </label>
@@ -556,21 +646,22 @@ export function SearchPage() {
                 <div className="sk-card p-8 text-center">
                   <Search className="mx-auto text-[#6e8c97]" size={25} />
                   <h3 className="sk-display mt-3 text-[17px] font-bold text-[#18364a]">
-                    No profiles match those filters
+                    No profiles match "{query}"
                   </h3>
                   <p className="mt-2 text-[13px] text-[#70818b]">
-                    Try clearing filters or search another Bengaluru area.
+                    Try searching by another area name, college, or resetting your filters.
                   </p>
                   <button
                     type="button"
                     className="sk-button sk-button-secondary mt-5"
                     onClick={() => {
-                      setArea('');
+                      setQuery('');
                       setPrice('any');
                       setGender('any');
                       setRoom('any');
                       setAmenities([]);
                       setViewLikedOnly(false);
+                      setVisibleCount(20);
                     }}
                   >
                     Reset search
@@ -589,16 +680,29 @@ export function SearchPage() {
                     />
                   ))}
 
+                  {/* Show More Properties (Pagination) */}
+                  {hasMorePaginated && (
+                    <div className="pt-2 text-center">
+                      <button
+                        type="button"
+                        onClick={() => setVisibleCount((prev) => prev + 20)}
+                        className="sk-button sk-button-secondary w-full text-xs font-bold py-3"
+                      >
+                        Load More PGs ({filtered.length - visibleCount} remaining)
+                      </button>
+                    </div>
+                  )}
+
                   {/* 5-PG Search Limit Barrier for Guests (#1) */}
                   {hasMoreUnauthenticated && (
                     <div className="sk-card border-2 border-dashed border-[#0878b0]/40 bg-[#edf7fa] p-6 text-center">
                       <ShieldCheck className="mx-auto text-[#0878b0]" size={30} />
                       <h3 className="sk-display mt-3 text-lg font-bold text-[#18364a]">
-                        Viewing first 5 PGs
+                        Viewing first 5 of {filtered.length} PGs
                       </h3>
                       <p className="mx-auto mt-2 max-w-sm text-xs text-[#506875]">
-                        Create a free StayKolo account using your phone number to unlock unlimited
-                        PG listings, side-by-side comparison, and 25% first-month discounts.
+                        Create a free StayKolo account using your phone number to unlock all {filtered.length} listings,
+                        side-by-side comparison, and 25% first-month discounts.
                       </p>
                       <div className="mt-4 flex justify-center gap-3">
                         <Link href="/auth/signup" className="sk-button sk-button-primary text-xs">
@@ -819,6 +923,7 @@ export function PropertyDetail() {
     (slug?.includes('koramangala') ? pgs.find((p) => p.slug.includes('koramangala')) : undefined) ||
     pgs[0];
   const [modal, setModal] = useState(false);
+  const [mediaMode, setMediaMode] = useState<'photos' | '360'>('360');
 
   // Amenities verification checklist rating by tenant/user (Req #22)
   const [verifiedAmenities, setVerifiedAmenities] = useState<Record<string, boolean>>({
@@ -863,37 +968,102 @@ export function PropertyDetail() {
             <ArrowLeft size={14} /> Back to search
           </Link>
 
-          {/* Photo Showcase */}
-          <div className="mt-5 grid gap-2 sm:grid-cols-[1.6fr_1fr]">
-            <img
-              src={property.images[0]}
-              alt={`${property.name} exterior`}
-              className="h-[260px] w-full rounded-[14px] object-cover sm:h-[390px]"
-            />
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-1">
-              <img
-                src={property.images[1]}
-                alt={`${property.name} common area`}
-                className="h-[127px] w-full rounded-[14px] object-cover sm:h-[191px]"
+          {/* Media View Mode Switcher */}
+          <div className="mt-4 flex items-center justify-between">
+            <div className="flex items-center gap-1 rounded-xl bg-[#edf7fa] p-1 border border-[#d9ebf0]">
+              <button
+                type="button"
+                onClick={() => setMediaMode('photos')}
+                className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
+                  mediaMode === 'photos'
+                    ? 'bg-white text-[#0878b0] shadow-xs'
+                    : 'text-[#506875] hover:text-[#18364a]'
+                }`}
+              >
+                📷 Photo Gallery
+              </button>
+              <button
+                type="button"
+                onClick={() => setMediaMode('360')}
+                className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
+                  mediaMode === '360'
+                    ? 'bg-[#0878b0] text-white shadow-xs'
+                    : 'text-[#0878b0] hover:bg-white/60'
+                }`}
+              >
+                <Compass size={13} className="animate-spin-slow" /> 🌐 360° Virtual Tour
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setMediaMode(mediaMode === '360' ? 'photos' : '360')}
+              className="text-xs font-bold text-[#0878b0] hover:underline flex items-center gap-1"
+            >
+              {mediaMode === '360' ? 'Switch to Photos →' : 'Launch 360° Panorama →'}
+            </button>
+          </div>
+
+          {/* 360 Virtual Tour View or Photos Showcase */}
+          {mediaMode === '360' ? (
+            <div className="mt-3">
+              <Interactive360View
+                lat={property.coordinates?.lat}
+                lng={property.coordinates?.lng}
+                name={property.name}
+                address={property.address}
+                googleMapsUrl={property.contact?.googleMaps}
+                height="h-[500px] sm:h-[580px]"
               />
-              <div className="sk-surface-blue flex flex-col justify-end rounded-[14px] p-5">
-                <span className="flex items-center gap-1.5 font-bold text-xs text-[#176d73]">
-                  <Gift size={15} /> 25% Off 1st Month Rent
-                </span>
-                <p className="text-[11px] font-medium leading-4 text-[#476772] mt-1">
-                  Exclusive StayKolo Verified Badge discount applied when contacting through our platform.
-                </p>
+            </div>
+          ) : (
+            <div className="mt-3 grid gap-2 sm:grid-cols-[1.6fr_1fr]">
+              <div className="relative overflow-hidden rounded-[14px]">
+                <img
+                  src={property.images[0]}
+                  alt={`${property.name} exterior`}
+                  className="h-[260px] w-full object-cover sm:h-[390px]"
+                />
+                <button
+                  type="button"
+                  onClick={() => setMediaMode('360')}
+                  className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-black/80 backdrop-blur-xs px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-[#0878b0] transition-colors"
+                >
+                  <Compass size={14} className="text-cyan-400" /> Enter 360° Virtual Tour
+                </button>
+              </div>
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-1">
+                <img
+                  src={property.images[1]}
+                  alt={`${property.name} common area`}
+                  className="h-[127px] w-full rounded-[14px] object-cover sm:h-[191px]"
+                />
+                <div className="sk-surface-blue flex flex-col justify-end rounded-[14px] p-5">
+                  <span className="flex items-center gap-1.5 font-bold text-xs text-[#176d73]">
+                    <Gift size={15} /> 25% Off 1st Month Rent
+                  </span>
+                  <p className="text-[11px] font-medium leading-4 text-[#476772] mt-1">
+                    Exclusive StayKolo Verified Badge discount applied when contacting through our platform.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           <div className="grid gap-10 py-9 lg:grid-cols-[1.15fr_.85fr]">
             <div>
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
-                  <span className="inline-flex items-center gap-1 rounded-full bg-[#edf7fa] px-3 py-1 text-xs font-bold text-[#0878b0]">
-                    <ShieldCheck size={14} /> {property.verification.status}
-                  </span>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[#edf7fa] px-3 py-1 text-xs font-bold text-[#0878b0]">
+                      <ShieldCheck size={14} /> {property.verification.status}
+                    </span>
+                    {property.college && (
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[#f4faf7] border border-[#cbebe0] px-3 py-1 text-xs font-bold text-[#1b7a5a]">
+                        <GraduationCap size={14} /> Near {property.college}
+                      </span>
+                    )}
+                  </div>
                   <h1 className="sk-display mt-2 text-[36px] font-bold leading-tight text-[#18364a]">
                     {property.name}
                   </h1>
@@ -981,12 +1151,24 @@ export function PropertyDetail() {
                 </div>
               </div>
 
-              {/* Location Map */}
+              {/* Location Map & Google Maps link */}
               <div className="mt-9 sk-card overflow-hidden">
-                <div className="p-5">
-                  <p className="sk-eyebrow">Location</p>
-                  <h2 className="sk-display mt-2 text-[20px] font-bold text-[#18364a]">{property.area}</h2>
-                  <p className="mt-1 text-[13px] text-[#6d7e88]">{property.address}</p>
+                <div className="p-5 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <p className="sk-eyebrow">Location</p>
+                    <h2 className="sk-display mt-1 text-[20px] font-bold text-[#18364a]">{property.area}</h2>
+                    <p className="mt-0.5 text-[13px] text-[#6d7e88]">{property.address}</p>
+                  </div>
+                  {property.contact?.googleMaps && (
+                    <a
+                      href={property.contact.googleMaps}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#edf7fa] border border-[#b8dde8] px-3 py-1.5 text-xs font-bold text-[#0878b0] hover:bg-[#e0f3f8]"
+                    >
+                      <Navigation size={13} /> Open in Google Maps <ExternalLink size={12} />
+                    </a>
+                  )}
                 </div>
                 <MapView
                   pins={[{ id: property.id, name: property.name, lat: property.coordinates.lat, lng: property.coordinates.lng }]}
@@ -1013,9 +1195,19 @@ export function PropertyDetail() {
                 <p className="mt-2 text-[13px] leading-6 text-[#6d7e88]">
                   Your details go straight to the property owner. No booking commission or hidden fees.
                 </p>
+                
+                {property.contact?.phone && (
+                  <a
+                    href={`tel:${property.contact.phone.replace(/[^0-9+]/g, '')}`}
+                    className="mt-4 flex items-center justify-center gap-2 rounded-xl border border-[#cce4ed] bg-[#f8fbfd] py-2.5 text-xs font-bold text-[#0878b0] hover:bg-[#edf7fa]"
+                  >
+                    <Phone size={14} /> Call PG: {property.contact.phone}
+                  </a>
+                )}
+
                 <button
                   type="button"
-                  className="sk-button sk-button-primary mt-5 w-full"
+                  className="sk-button sk-button-primary mt-3 w-full"
                   onClick={() => setModal(true)}
                   data-testid="button-apply-contact"
                 >
@@ -1169,10 +1361,9 @@ function AuthLayout({
   );
 }
 
-/* ========== ROLE-BASED LOGIN PAGE (Req #5, #19, #33, #2) ========== */
+/* ========== UNIFIED LOGIN PAGE ========== */
 export function LoginPage() {
   const [, setLocation] = useLocation();
-  const [selectedRole, setSelectedRole] = useState<'tenant' | 'admin' | 'staff' | 'superadmin'>('tenant');
   const [contact, setContact] = useState('');
   const [password, setPassword] = useState('');
   const [state, setState] = useState<'idle' | 'loading'>('idle');
@@ -1182,7 +1373,7 @@ export function LoginPage() {
   const submit = (e: FormEvent) => {
     e.preventDefault();
     if (!contact || !password) {
-      setError('Enter your phone number (UID) and password.');
+      setError('Enter your phone number and password.');
       return;
     }
 
@@ -1190,61 +1381,50 @@ export function LoginPage() {
     setState('loading');
 
     setTimeout(() => {
-      // Role-based routing (#5)
-      if (selectedRole === 'tenant') {
-        setLocation('/tenant/home');
-      } else if (selectedRole === 'admin') {
+      // Automatic role detection from stored user or credentials
+      const savedUserStr = localStorage.getItem('staykolo.mockUser');
+      let role = 'tenant';
+      if (savedUserStr) {
+        try {
+          const parsed = JSON.parse(savedUserStr);
+          if (parsed.contact === contact && parsed.role) {
+            role = parsed.role;
+          }
+        } catch (_) {}
+      }
+
+      // Quick-test keyword or demo phone number handling
+      const lower = contact.toLowerCase();
+      if (lower.includes('superadmin') || contact === '9999999999') role = 'superadmin';
+      else if (lower.includes('admin') || lower.includes('owner') || contact === '8888888888') role = 'admin';
+      else if (lower.includes('staff') || contact === '7777777777') role = 'staff';
+
+      if (role === 'admin') {
         if (contact.includes('new') || contact.includes('pending')) {
           setOwnerPendingMessage(true);
           setState('idle');
         } else {
           setLocation('/admin/overview');
         }
-      } else if (selectedRole === 'staff') {
+      } else if (role === 'staff') {
         setLocation('/staff/overview');
-      } else if (selectedRole === 'superadmin') {
+      } else if (role === 'superadmin') {
         setLocation('/superadmin/overview');
       } else {
-        setLocation('/search');
+        setLocation('/tenant/home');
       }
     }, 500);
   };
 
   return (
     <AuthLayout
-      eyebrow="Single Entry Point"
-      title="Role-Based Access."
-      copy="One universal login portal for Tenants, PG Owners, Staff, and StayKolo Platform Administrators."
+      eyebrow="StayKolo Access"
+      title="Welcome Back."
+      copy="Log in to manage your stays, view shortlisted PGs, check booking statuses, and access your StayKolo services."
     >
       <p className="sk-eyebrow">StayKolo Account</p>
-      <h2 className="sk-display mt-2 text-[26px] font-bold text-[#18364a]">Select your role to sign in.</h2>
-
-      {/* Role Picker (Req #5) */}
-      <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-2">
-        {[
-          { id: 'tenant', label: 'Tenant', icon: <User size={14} />, route: '/tenant' },
-          { id: 'admin', label: 'PG Owner', icon: <Home size={14} />, route: '/admin' },
-          { id: 'staff', label: 'Staff', icon: <UserCheck size={14} />, route: '/staff' },
-          { id: 'superadmin', label: 'Super Admin', icon: <ShieldCheck size={14} />, route: '/superadmin' },
-        ].map((r) => (
-          <button
-            key={r.id}
-            type="button"
-            onClick={() => {
-              setSelectedRole(r.id as typeof selectedRole);
-              setOwnerPendingMessage(false);
-            }}
-            className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-xs font-bold transition-all ${
-              selectedRole === r.id
-                ? 'border-[#168aad] bg-[#edf7fa] text-[#0878b0] shadow-sm'
-                : 'border-[#dfe9ed] bg-white text-[#506875] hover:bg-[#f8fafb]'
-            }`}
-          >
-            <span className="mb-1">{r.icon}</span>
-            <span>{r.label}</span>
-          </button>
-        ))}
-      </div>
+      <h2 className="sk-display mt-2 text-[26px] font-bold text-[#18364a]">Sign in to your account</h2>
+      <p className="text-xs text-[#506875] mt-1">Enter your registered phone number and password.</p>
 
       {ownerPendingMessage ? (
         <div className="mt-6 rounded-xl bg-[#edf7fa] p-5 text-center">
@@ -1287,7 +1467,7 @@ export function LoginPage() {
             className="sk-button sk-button-primary w-full disabled:opacity-50"
             data-testid="button-login-submit"
           >
-            {state === 'loading' ? 'Authenticating…' : `Enter as ${selectedRole.toUpperCase()}`} <ArrowRight size={15} />
+            {state === 'loading' ? 'Authenticating…' : 'Sign In'} <ArrowRight size={15} />
           </button>
 
           <div className="flex justify-between items-center text-xs pt-2">
@@ -1304,10 +1484,8 @@ export function LoginPage() {
   );
 }
 
-/* ========== SIGNUP PAGE (Req #19, #33, #50) ========== */
+/* ========== UNIFIED SIGNUP PAGE ========== */
 export function SignupPage() {
-  const params = new URLSearchParams(window.location.search);
-  const [role, setRole] = useState(params.get('role') === 'owner' ? 'owner' : 'tenant');
   const [name, setName] = useState('');
   const [contact, setContact] = useState('');
   const [password, setPassword] = useState('');
@@ -1331,7 +1509,7 @@ export function SignupPage() {
         JSON.stringify({
           name,
           contact,
-          role,
+          role: 'tenant',
           consent: [
             { agreedDocument: 'terms', version: '2026-09-26', timestamp: now },
             { agreedDocument: 'privacy', version: '2026-09-26', timestamp: now },
@@ -1346,41 +1524,18 @@ export function SignupPage() {
     <AuthLayout
       eyebrow="Create an account"
       title="Start with a better-informed move."
-      copy="Save a shortlist, send focused enquiries, claim 25% move-in discount, and access role-based portals."
+      copy="Save a shortlist, send focused enquiries, claim 25% move-in discount, and access all StayKolo services."
     >
       <p className="sk-eyebrow">Create account</p>
-      <h2 className="sk-display mt-2 text-[26px] font-bold text-[#18364a]">Who are you registering as?</h2>
-      <div className="mt-4 grid gap-2 sm:grid-cols-2">
-        <button
-          type="button"
-          className={`rounded-lg border p-3.5 text-left ${
-            role === 'tenant' ? 'border-[#168aad] bg-[#edf7fa]' : 'border-[#d9e4e8] bg-white'
-          }`}
-          onClick={() => setRole('tenant')}
-        >
-          <UserRound size={17} className="text-[#0878b0]" />
-          <span className="mt-2 block text-xs font-bold text-[#355364]">PG Seeker / Tenant</span>
-          <span className="mt-0.5 block text-[11px] text-[#778891]">Compare stays, get 25% off 1st mo.</span>
-        </button>
-        <button
-          type="button"
-          className={`rounded-lg border p-3.5 text-left ${
-            role === 'owner' ? 'border-[#168aad] bg-[#edf7fa]' : 'border-[#d9e4e8] bg-white'
-          }`}
-          onClick={() => setRole('owner')}
-        >
-          <Home size={17} className="text-[#0878b0]" />
-          <span className="mt-2 block text-xs font-bold text-[#355364]">PG Owner / Admin</span>
-          <span className="mt-0.5 block text-[11px] text-[#778891]">List property &amp; manage tenants.</span>
-        </button>
-      </div>
+      <h2 className="sk-display mt-2 text-[26px] font-bold text-[#18364a]">Create your account</h2>
+      <p className="text-xs text-[#506875] mt-1">Sign up with your phone number to get started with StayKolo.</p>
 
       {state === 'success' ? (
         <div className="mt-6 rounded-lg bg-[#edf7fa] p-5 text-center">
           <Check className="mx-auto text-[#168aad]" size={24} />
           <h3 className="sk-display mt-3 text-lg font-bold text-[#18364a]">Account Created</h3>
           <p className="mt-1 text-xs text-[#6d7e88]">Your UID ({contact}) is registered.</p>
-          <Link href={role === 'owner' ? '/admin/overview' : '/tenant/home'} className="sk-button sk-button-primary mt-4 text-xs">
+          <Link href="/tenant/home" className="sk-button sk-button-primary mt-4 text-xs">
             Continue to Portal
           </Link>
         </div>
@@ -1699,112 +1854,329 @@ export function AboutPage() {
 }
 
 /* ========== CONTACT PAGE ========== */
+/* ========== CONTACT & GET VERIFIED PAGE ========== */
 export function ContactPage() {
-  const [name, setName] = useState('');
-  const [contact, setContact] = useState('');
-  const [subject, setSubject] = useState('');
-  const [message, setMessage] = useState('');
-  const [submitted, setSubmitted] = useState(false);
+  const [activeTab, setActiveTab] = useState<'verify' | 'contact'>(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('tab') === 'verify' || window.location.pathname === '/get-verified') {
+        return 'verify';
+      }
+    }
+    return 'verify';
+  });
 
-  const submit = (e: FormEvent) => {
+  // General Contact Form State
+  const [generalName, setGeneralName] = useState('');
+  const [generalContact, setGeneralContact] = useState('');
+  const [generalSubject, setGeneralSubject] = useState('');
+  const [generalMessage, setGeneralMessage] = useState('');
+  const [generalSubmitted, setGeneralSubmitted] = useState(false);
+
+  // Simplified PG Get Verified Form State
+  const [pgName, setPgName] = useState('');
+  const [pgPhone, setPgPhone] = useState('');
+  const [googleMapsUrl, setGoogleMapsUrl] = useState('');
+  const [verifySubmitted, setVerifySubmitted] = useState(false);
+  const [verificationId, setVerificationId] = useState('');
+
+  const handleGeneralSubmit = (e: FormEvent) => {
     e.preventDefault();
-    if (!name || !contact) return;
-    setSubmitted(true);
+    if (!generalName || !generalContact) return;
+    setGeneralSubmitted(true);
+  };
+
+  const handleVerifySubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (!pgName || !pgPhone) return;
+    const refId = `SK-VRF-${Math.floor(100000 + Math.random() * 900000)}`;
+    setVerificationId(refId);
+    setVerifySubmitted(true);
   };
 
   return (
     <Shell>
       <main>
+        {/* Hero Section */}
         <section className="border-b border-[#dfe9ee] bg-[#edf7fa]">
-          <div className="sk-container py-14 sm:py-20">
-            <p className="sk-eyebrow">StayKolo Support</p>
-            <h1 className="sk-display mt-2 text-[40px] font-bold text-[#18364a] sm:text-[52px]">
-              Get in touch with our team.
+          <div className="sk-container py-12 sm:py-16">
+            <div className="flex items-center gap-2 mb-2">
+              <KarnatakaFlag className="h-3.5 w-5" />
+              <p className="sk-eyebrow">StayKolo Support & PG Onboarding</p>
+            </div>
+            <h1 className="sk-display mt-2 text-[36px] font-bold text-[#18364a] sm:text-[46px]">
+              {activeTab === 'verify'
+                ? 'Get Your PG Verified on StayKolo'
+                : 'Contact StayKolo Operations'}
             </h1>
-            <p className="mt-4 max-w-[550px] text-[16px] leading-7 text-[#59717e]">
-              Have questions about PG onboarding, 25% discount claims, or need assistance? We are here to help.
+            <p className="mt-3 max-w-[620px] text-[15px] leading-7 text-[#59717e]">
+              {activeTab === 'verify'
+                ? 'Enter your PG name, contact phone number, and Google Maps location URL to get listed and verified.'
+                : 'Have questions about platform features, tenant move-ins, or need direct support? We are ready to assist you.'}
             </p>
+
+            {/* Tab Selector */}
+            <div className="mt-8 flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => setActiveTab('verify')}
+                className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs font-bold transition-all ${
+                  activeTab === 'verify'
+                    ? 'bg-[#0878b0] text-white shadow-sm'
+                    : 'bg-white text-[#4d626f] border border-[#d9e3e8] hover:bg-[#f5f8f9]'
+                }`}
+              >
+                <ShieldCheck size={16} /> Get Verified (List Your PG)
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('contact')}
+                className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs font-bold transition-all ${
+                  activeTab === 'contact'
+                    ? 'bg-[#0878b0] text-white shadow-sm'
+                    : 'bg-white text-[#4d626f] border border-[#d9e3e8] hover:bg-[#f5f8f9]'
+                }`}
+              >
+                <Mail size={16} /> General Support & Inquiries
+              </button>
+            </div>
           </div>
         </section>
 
-        <section className="sk-container py-14">
-          <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
-            <div className="space-y-6">
-              <div className="sk-card p-6">
-                <h3 className="sk-display text-base font-bold text-[#18364a]">Bengaluru Operations Hub</h3>
-                <p className="mt-2 text-xs leading-relaxed text-[#6d7e88]">
-                  CoreForge Technologies<br />
-                  14th Main Rd, Sector 4, HSR Layout<br />
-                  Bengaluru, Karnataka 560102
+        {/* ================= GET VERIFIED TAB (SIMPLIFIED) ================= */}
+        {activeTab === 'verify' && (
+          <section className="sk-container py-12">
+            {verifySubmitted ? (
+              <div className="mx-auto max-w-[640px] sk-card p-8 text-center bg-white border-[#168aad]">
+                <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-[#edf7fa] text-[#0878b0]">
+                  <ShieldCheck size={36} />
+                </div>
+                <h2 className="sk-display mt-4 text-2xl font-bold text-[#18364a]">
+                  Verification Request Received!
+                </h2>
+                <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-[#e4f4f7] px-4 py-1 text-xs font-bold text-[#0878b0]">
+                  Reference ID: <span className="font-mono">{verificationId}</span>
+                </div>
+                <p className="mt-4 text-xs leading-relaxed text-[#59717e] max-w-[500px] mx-auto">
+                  Thank you! Your PG <strong className="text-[#18364a]">{pgName}</strong> (Contact: <strong className="text-[#18364a]">{pgPhone}</strong>) has been queued for verification.
                 </p>
-                <div className="mt-4 pt-4 border-t border-[#edf1f3] space-y-2 text-xs text-[#506875]">
-                  <p className="flex items-center gap-2">
-                    <Phone size={14} className="text-[#0878b0]" /> +91 98450 12345
+
+                {googleMapsUrl && (
+                  <div className="mt-4 rounded-lg bg-[#f8fafb] border border-[#edf1f3] p-3 text-xs text-left">
+                    <span className="font-semibold text-[#18364a] block">Google Maps Location:</span>
+                    <a
+                      href={googleMapsUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#0878b0] underline truncate block mt-0.5"
+                    >
+                      {googleMapsUrl}
+                    </a>
+                  </div>
+                )}
+
+                <div className="mt-6 rounded-xl border border-[#edf1f3] bg-[#fbfcfd] p-4 text-left text-xs space-y-2">
+                  <p className="flex items-center gap-2 text-[#59717e]">
+                    <Check size={14} className="text-[#0878b0]" /> Our field executive will contact <strong>{pgPhone}</strong> within 24 hours.
                   </p>
-                  <p className="flex items-center gap-2">
-                    <Mail size={14} className="text-[#0878b0]" /> support@staykolo.in
+                  <p className="flex items-center gap-2 text-[#59717e]">
+                    <Check size={14} className="text-[#0878b0]" /> Verified badge & 25% tenant vouchers will be activated on search.
                   </p>
                 </div>
-              </div>
 
-              <div className="sk-card p-6 bg-[#fff8f5] border-[#fbd4c2]">
-                <h4 className="text-xs font-bold text-[#b55b25] flex items-center gap-1.5">
-                  <Gift size={14} /> PG Owner Partner Programme
-                </h4>
-                <p className="text-[11px] text-[#6d7e88] mt-2 leading-relaxed">
-                  List your PG on StayKolo and access automated food menu management, staff duty rosters, digital rent reminders, and visitor logs.
-                </p>
-                <Link href="/auth/signup?role=owner" className="inline-block mt-3 text-xs font-bold text-[#b55b25] hover:underline">
-                  List your property →
-                </Link>
-              </div>
-            </div>
-
-            <div className="sk-card p-8">
-              <h2 className="sk-display text-xl font-bold text-[#18364a]">Send a message</h2>
-              {submitted ? (
-                <div className="mt-6 rounded-xl bg-[#edf7fa] p-6 text-center">
-                  <Check className="mx-auto text-[#0878b0]" size={28} />
-                  <h3 className="sk-display mt-3 text-lg font-bold text-[#18364a]">Message Received</h3>
-                  <p className="mt-2 text-xs text-[#6d7e88]">
-                    Thank you {name}. Our Bangalore operations team will respond to {contact} within 4 working hours.
-                  </p>
-                  <button type="button" className="sk-button sk-button-primary mt-5 text-xs" onClick={() => setSubmitted(false)}>
-                    Send Another Message
+                <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+                  <Link href="/search" className="sk-button sk-button-primary text-xs">
+                    Browse All PGs <ArrowRight size={14} />
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setVerifySubmitted(false);
+                      setPgName('');
+                      setPgPhone('');
+                      setGoogleMapsUrl('');
+                    }}
+                    className="sk-button sk-button-secondary text-xs"
+                  >
+                    Submit Another PG
                   </button>
                 </div>
-              ) : (
-                <form onSubmit={submit} className="mt-6 space-y-4">
-                  <Field label="Your Name" name="contact-name" value={name} onChange={setName} placeholder="Rahul Sharma" />
-                  <Field label="Phone Number (UID) or Email" name="contact-phone" value={contact} onChange={setContact} placeholder="+91 98765 43210" />
+              </div>
+            ) : (
+              <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr] max-w-[950px] mx-auto">
+                {/* Simplified Form */}
+                <form onSubmit={handleVerifySubmit} className="sk-card p-6 sm:p-8 space-y-5">
+                  <div>
+                    <h3 className="sk-display text-lg font-bold text-[#18364a]">PG Verification Details</h3>
+                    <p className="text-xs text-[#6d7e88] mt-1">
+                      Fill in your PG details to get verified and listed on StayKolo.
+                    </p>
+                  </div>
+
+                  <Field
+                    label="PG Name"
+                    name="pg-name"
+                    value={pgName}
+                    onChange={setPgName}
+                    placeholder="e.g. Lively Legacy PG"
+                  />
+
+                  <Field
+                    label="Contact Phone Number"
+                    name="pg-phone"
+                    value={pgPhone}
+                    onChange={setPgPhone}
+                    placeholder="e.g. 9845012345"
+                  />
+
                   <label className="block">
-                    <span className="mb-1.5 block text-xs font-bold text-[#405966]">Subject</span>
+                    <span className="mb-1.5 block text-xs font-bold text-[#405966]">
+                      Google Maps Location URL
+                    </span>
                     <input
-                      type="text"
-                      value={subject}
-                      onChange={(e) => setSubject(e.target.value)}
-                      placeholder="e.g. PG Listing verification, 25% discount"
+                      type="url"
+                      value={googleMapsUrl}
+                      onChange={(e) => setGoogleMapsUrl(e.target.value)}
+                      placeholder="https://maps.app.goo.gl/... or Google Maps link"
                       className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-xs outline-none focus:border-[#168aad]"
+                      required
                     />
                   </label>
-                  <label className="block">
-                    <span className="mb-1.5 block text-xs font-bold text-[#405966]">Message</span>
-                    <textarea
-                      rows={4}
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="How can we help you?"
-                      className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-xs outline-none focus:border-[#168aad]"
-                    />
-                  </label>
-                  <button type="submit" className="sk-button sk-button-primary w-full text-xs">
-                    Submit Message <ArrowRight size={14} />
+
+                  <button type="submit" className="sk-button sk-button-primary w-full text-xs py-3 font-bold">
+                    <ShieldCheck size={16} /> Submit PG for Verification
                   </button>
                 </form>
-              )}
+
+                {/* Right Benefits Card */}
+                <div className="space-y-4">
+                  <div className="sk-card p-6 bg-[#edf7fa] border-[#b2e2ec]">
+                    <h4 className="font-bold text-[#18364a] text-sm flex items-center gap-2">
+                      <ShieldCheck size={18} className="text-[#0878b0]" /> Why Get Verified?
+                    </h4>
+                    <ul className="mt-3 space-y-2.5 text-xs text-[#46616e]">
+                      <li className="flex items-start gap-2">
+                        <Check className="mt-0.5 text-[#0878b0] shrink-0" size={14} />
+                        <span><strong>Top Search Placement:</strong> Verified PGs appear first on the StayKolo map.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="mt-0.5 text-[#0878b0] shrink-0" size={14} />
+                        <span><strong>Zero Brokerage:</strong> Direct calls from students and working professionals.</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <Check className="mt-0.5 text-[#0878b0] shrink-0" size={14} />
+                        <span><strong>25% Discount Vouchers:</strong> Faster bookings sponsored by StayKolo.</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="sk-card p-5">
+                    <h5 className="font-bold text-[#18364a] text-xs">Need Assistance?</h5>
+                    <p className="mt-1 text-xs text-[#6d7e88]">Call our Bengaluru Onboarding Desk:</p>
+                    <p className="mt-2 text-xs font-semibold text-[#0878b0] flex items-center gap-1.5">
+                      <Phone size={13} /> +91 98450 12345
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ================= GENERAL SUPPORT TAB ================= */}
+        {activeTab === 'contact' && (
+          <section className="sk-container py-12">
+            <div className="grid gap-10 lg:grid-cols-[1fr_1.2fr]">
+              <div className="space-y-6">
+                <div className="sk-card p-6">
+                  <h3 className="sk-display text-base font-bold text-[#18364a]">Bengaluru Operations Hub</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-[#6d7e88]">
+                    CoreForge Technologies<br />
+                    14th Main Rd, Sector 4, HSR Layout<br />
+                    Bengaluru, Karnataka 560102
+                  </p>
+                  <div className="mt-4 pt-4 border-t border-[#edf1f3] space-y-2 text-xs text-[#506875]">
+                    <p className="flex items-center gap-2">
+                      <Phone size={14} className="text-[#0878b0]" /> +91 98450 12345
+                    </p>
+                    <p className="flex items-center gap-2">
+                      <Mail size={14} className="text-[#0878b0]" /> support@staykolo.in
+                    </p>
+                  </div>
+                </div>
+
+                <div className="sk-card p-6 bg-[#fff8f5] border-[#fbd4c2]">
+                  <h4 className="text-xs font-bold text-[#b55b25] flex items-center gap-1.5">
+                    <Gift size={14} /> 25% Off Tenant Voucher Questions
+                  </h4>
+                  <p className="text-[11px] text-[#6d7e88] mt-2 leading-relaxed">
+                    Vouchers are issued automatically upon confirming your move-in through verified StayKolo properties.
+                  </p>
+                </div>
+              </div>
+
+              <div className="sk-card p-8">
+                <h2 className="sk-display text-xl font-bold text-[#18364a]">Send a message</h2>
+                {generalSubmitted ? (
+                  <div className="mt-6 rounded-xl bg-[#edf7fa] p-6 text-center">
+                    <Check className="mx-auto text-[#0878b0]" size={28} />
+                    <h3 className="sk-display mt-3 text-lg font-bold text-[#18364a]">Message Received</h3>
+                    <p className="mt-2 text-xs text-[#6d7e88]">
+                      Thank you {generalName}. Our Bangalore operations team will respond to {generalContact} within 4 working hours.
+                    </p>
+                    <button
+                      type="button"
+                      className="sk-button sk-button-primary mt-5 text-xs"
+                      onClick={() => setGeneralSubmitted(false)}
+                    >
+                      Send Another Message
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleGeneralSubmit} className="mt-6 space-y-4">
+                    <Field
+                      label="Your Name"
+                      name="contact-name"
+                      value={generalName}
+                      onChange={setGeneralName}
+                      placeholder="Rahul Sharma"
+                    />
+                    <Field
+                      label="Phone Number (UID) or Email"
+                      name="contact-phone"
+                      value={generalContact}
+                      onChange={setGeneralContact}
+                      placeholder="+91 98765 43210"
+                    />
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs font-bold text-[#405966]">Subject</span>
+                      <input
+                        type="text"
+                        value={generalSubject}
+                        onChange={(e) => setGeneralSubject(e.target.value)}
+                        placeholder="e.g. PG Listing verification, 25% discount"
+                        className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-xs outline-none focus:border-[#168aad]"
+                      />
+                    </label>
+                    <label className="block">
+                      <span className="mb-1.5 block text-xs font-bold text-[#405966]">Message</span>
+                      <textarea
+                        rows={4}
+                        value={generalMessage}
+                        onChange={(e) => setGeneralMessage(e.target.value)}
+                        placeholder="How can we help you?"
+                        className="w-full rounded-lg border border-[#d3e0e4] p-2.5 text-xs outline-none focus:border-[#168aad]"
+                      />
+                    </label>
+                    <button type="submit" className="sk-button sk-button-primary w-full text-xs">
+                      Submit Message <ArrowRight size={14} />
+                    </button>
+                  </form>
+                )}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
       </main>
     </Shell>
   );

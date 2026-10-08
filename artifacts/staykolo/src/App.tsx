@@ -31,6 +31,7 @@ function Router() {
         <Route path="/chronicles/:tag" component={ChronicleTagPage} />
         <Route path="/about" component={AboutPage} />
         <Route path="/contact" component={ContactPage} />
+        <Route path="/get-verified" component={ContactPage} />
         <Route path="/legal/terms"><LegalPage kind="terms" /></Route>
         <Route path="/legal/privacy"><LegalPage kind="privacy" /></Route>
         <Route path="/legal/data-deletion"><LegalPage kind="deletion" /></Route>
