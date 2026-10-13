@@ -176,12 +176,14 @@ export function Home2() {
             <h2 className="sk-display mt-3 text-[34px] font-bold leading-tight tracking-[-.045em] sm:text-[44px]">Start with where you want to be.</h2>
             <p className="mt-3 text-[13px] leading-6 text-[#686a61]">Search Bengaluru PG listings by the area that makes your daily commute work.</p>
           </div>
-          <div className="mt-7 flex flex-wrap gap-2">
-            {neighbourhoods.map((area) => (
-              <Link key={area} href={`/search?q=${encodeURIComponent(area)}`} className="inline-flex items-center gap-2 rounded-full border border-[#d4d0c6] bg-[#f7f5ed] px-4 py-2.5 text-[12px] font-semibold text-[#4c4e46] transition hover:border-[#829e39] hover:bg-[#e9f2cd]">
-                <MapPin size={13} className="text-[#728f2c]" />{area}
-              </Link>
-            ))}
+          <div className="mt-7 flex items-center gap-3">
+            <div className="sk-scrollbar-hide flex min-w-0 flex-1 snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth pb-2">
+              {neighbourhoods.map((area) => (
+                <Link key={area} href={`/search?q=${encodeURIComponent(area)}`} className="inline-flex shrink-0 snap-start items-center gap-2 rounded-full border border-[#d4d0c6] bg-[#f7f5ed] px-4 py-2.5 text-[12px] font-semibold text-[#4c4e46] transition hover:border-[#829e39] hover:bg-[#e9f2cd]">
+                  <MapPin size={13} className="text-[#728f2c]" />{area}
+                </Link>
+              ))}
+            </div>
           </div>
         </section>
 
@@ -193,28 +195,6 @@ export function Home2() {
               <p className="mt-3 max-w-[520px] text-[14px] leading-6 text-[#686a61]">A simple side-by-side look at verified profiles. No photos to distract from the practicals.</p>
             </div>
             <Link href="/search" className="inline-flex w-fit items-center gap-2 rounded-full bg-[#1b1d18] px-5 py-3 text-[12px] font-bold text-white transition hover:bg-[#3a3d32]">Compare all stays <ArrowRight size={15} /></Link>
-          </div>
-          <div className="mt-8 overflow-x-auto rounded-[20px] border border-[#dedbd0] bg-[#eeebe2]">
-            <table className="w-full min-w-[680px] border-collapse text-left text-[12px]">
-              <thead>
-                <tr className="border-b border-[#dedbd0]">
-                  <th className="w-[180px] p-4 text-[10px] font-bold uppercase tracking-[.12em] text-[#77796f]">Property details</th>
-                  <th className="p-4 align-top"><span className="inline-flex items-center gap-1.5 text-[13px] font-extrabold"><ShieldCheck size={14} className="text-[#728f2c]" />{verifiedPg.name}</span><span className="mt-1 block pl-5 text-[11px] font-medium text-[#77796f]">{verifiedPg.area}</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  ['Address', verifiedPg.address],
-                  ['Listed amenities', standardAmenities.join(' · ')],
-                  ['Maps', 'Open the property location in Google Maps'],
-                ].map(([label, value]) => (
-                  <tr key={label} className="border-t border-[#dedbd0]">
-                    <th className="p-4 font-semibold text-[#686a61]">{label}</th>
-                    <td className="p-4 font-semibold">{label === 'Maps' ? <a href={verifiedPg.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 underline underline-offset-4">{value}<ExternalLink size={12} /></a> : value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
         </section>
 

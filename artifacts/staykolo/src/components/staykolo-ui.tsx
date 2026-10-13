@@ -26,6 +26,7 @@ export function Logo() {
 const navItems = [
   { href: '/search', label: 'Find a PG' },
   { href: '/blogs', label: 'Blogs' },
+  { href: '/faq', label: 'FAQs' },
   { href: '/contact', label: 'Contact Us' },
 ];
 
@@ -48,7 +49,7 @@ export function SiteNav() {
     <div className="sk-container flex h-[72px] items-center justify-between">
       <div className="flex items-center gap-10"><Logo /><span className="hidden border-l border-[#d8d4ca] pl-10 text-[12px] text-[#77796f] md:block">A better place to land.</span></div>
       <nav className="hidden items-center gap-7 md:flex" aria-label="Primary navigation">
-        {navItems.map((item) => <Link key={item.href} href={item.href} className="text-[13px] font-semibold text-[#5e6058] transition-colors hover:text-[#1b1d18]" data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`}>{item.label}</Link>)}
+        {navItems.map((item) => <Link key={item.href} href={item.href} className="inline-flex items-center gap-1.5 text-[13px] font-semibold text-[#5e6058] transition-colors hover:text-[#1b1d18]" data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`}>{item.href === '/search' && <Search size={14} />}{item.label}</Link>)}
       </nav>
       <div className="hidden items-center gap-2 md:flex">
         {profile ? <Link href="/profile" className="inline-flex items-center gap-2 rounded-full border border-[#d4d0c6] bg-[#f7f5ed] py-1 pl-1 pr-3 text-[12px] font-semibold"><Avatar profile={profile} /> My profile</Link> : <Link href="/auth/login" className="sk-button sk-button-secondary" data-testid="link-sign-in">Sign in / Sign up</Link>}
@@ -57,6 +58,9 @@ export function SiteNav() {
         </Link>
       </div>
       <div className="flex items-center gap-2 md:hidden">
+        <Link href="/search" className="grid h-10 w-10 place-items-center rounded-full text-[#1b1d18] transition-colors hover:bg-[#e9f2cd]" aria-label="Search PGs" data-testid="link-mobile-search">
+          <Search size={19} />
+        </Link>
         <Link href={profile ? '/profile' : '/auth/login'} className="flex items-center justify-center rounded-full border border-[#d4d0c6] bg-[#f7f5ed] p-1 shadow-sm transition-colors hover:border-[#1b1d18]" aria-label={profile ? 'My profile' : 'Sign in / Sign up'}>
           <Avatar profile={profile ?? defaultProfile} className="h-8 w-8 border border-white" />
         </Link>
@@ -122,6 +126,7 @@ export function SiteFooter() {
       <nav className="flex flex-wrap gap-x-5 gap-y-2 font-semibold" aria-label="Footer links">
         <Link href="/search" className="hover:text-[#1b1d18]">Find a stay</Link>
         <Link href="/blogs" className="hover:text-[#1b1d18]">Blogs</Link>
+        <Link href="/faq" className="hover:text-[#1b1d18]">FAQs</Link>
         <Link href="/contact" className="hover:text-[#1b1d18]">Contact</Link>
         <Link href="/legal/terms" className="hover:text-[#1b1d18]">Terms &amp; Conditions</Link>
         <Link href="/legal/privacy" className="hover:text-[#1b1d18]">Privacy</Link>

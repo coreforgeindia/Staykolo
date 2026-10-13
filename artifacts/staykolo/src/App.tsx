@@ -5,6 +5,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { Home2 } from '@/pages/home2';
+import { FaqPage } from '@/pages/faq-page';
 import { BlogArticlePage, BlogTagPage, BlogsPage, ContactPage, ForgotPasswordPage, LegalPage, LoginPage, PropertyDetail, ResetPasswordPage, SearchPage, WebsiteProfilePage } from '@/pages/app-pages';
 import { UserDashboard } from '@/pages/user-dashboard';
 import { StaffDashboard } from '@/pages/staff-dashboard';
@@ -28,6 +29,7 @@ function Router() {
         <Route path="/" component={Home2} />
         <Route path="/home2" component={Home2} />
         <Route path="/search" component={SearchPage} />
+        <Route path="/faq" component={FaqPage} />
         <Route path="/pg/:slug" component={PropertyDetail} />
         <Route path="/blogs/article/:slug" component={BlogArticlePage} />
         <Route path="/blogs/:tag" component={BlogTagPage} />

@@ -4,7 +4,7 @@ import {
   ArrowLeft, ArrowRight, Check, CheckCircle, ChevronDown, CircleAlert, ExternalLink, Eye, EyeOff, FileText,
   Fan, Gift, GraduationCap, Heart, Home, Info, Mail, MapPin, Navigation, Phone, RotateCcw, Scale, Search, ShieldCheck,
   Droplets, Wifi,
-  SlidersHorizontal, Sparkles, User, UserCheck, UserRound, Users, Wrench, X,
+  SlidersHorizontal, Sparkles, Trash2, User, UserCheck, UserRound, Users, Wrench, X,
 } from 'lucide-react';
 import { MapView } from '@/components/map-view';
 import { BrandKarnatakaBadge, KarnatakaFlag, SectionHeading, SiteFooter, SiteNav } from '@/components/staykolo-ui';
@@ -248,10 +248,10 @@ export function SearchPage() {
   const initialQuery = searchParams.get('q') || searchParams.get('area') || '';
   const directoryOnly = searchParams.get('status') === 'directory';
   const [query, setQuery] = useState(initialQuery);
+  const [selectedHub, setSelectedHub] = useState('');
   const [selected, setSelected] = useState(pgs[0]?.id || '');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
-  const [mobileTab, setMobileTab] = useState<'list' | 'map'>('list');
   const [visibleCount, setVisibleCount] = useState(20);
   const [compareModal, setCompareModal] = useState(false);
 
@@ -317,12 +317,23 @@ export function SearchPage() {
               </div>
             </div>
 
-            {/* Smart Suggestions Bar (Colleges & Key Hubs) */}
-            <div className="mt-5 flex flex-wrap items-center gap-2 text-xs">
-              <span className="flex items-center gap-1 font-bold text-[#476772]">
+            {/* Quick Hubs */}
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <label htmlFor="quick-hubs" className="flex items-center gap-1 text-xs font-bold text-[#476772]">
                 <Sparkles size={13} className="text-[#168aad]" /> Quick Hubs:
-              </span>
-              {[
+              </label>
+              <select
+                id="quick-hubs"
+                value={selectedHub}
+                onChange={(event) => {
+                  setSelectedHub(event.target.value);
+                  setQuery(event.target.value);
+                  setVisibleCount(20);
+                }}
+                className="min-h-10 min-w-[220px] rounded-full border border-[#d3e0e4] bg-white px-4 text-xs font-semibold text-[#476772] outline-none transition-colors focus:border-[#829e39]"
+              >
+                <option value="">Choose an area or college</option>
+                {[
                 { label: 'PES University', q: 'PES University' },
                 { label: 'Vijaynagar', q: 'Vijaynagar' },
                 { label: 'MS Ramaiah (MSRIT)', q: 'MS Ramaiah' },
@@ -334,23 +345,8 @@ export function SearchPage() {
                 { label: 'Dayananda Sagar (DSCE)', q: 'DSCE' },
                 { label: 'Koramangala', q: 'Koramangala' },
                 { label: 'Malleshwaram', q: 'Malleshwaram' },
-              ].map((sug) => (
-                <button
-                  key={sug.label}
-                  type="button"
-                  onClick={() => {
-                    setQuery(sug.q);
-                    setVisibleCount(20);
-                  }}
-                  className={`rounded-full border px-3 py-1 text-xs font-semibold transition-colors ${
-                    query === sug.q
-                      ? 'border-[#168aad] bg-[#168aad] text-white'
-                      : 'border-[#d3e0e4] bg-white text-[#476772] hover:border-[#168aad] hover:bg-[#edf7fa]'
-                  }`}
-                >
-                  {sug.label}
-                </button>
-              ))}
+                ].map((sug) => <option key={sug.label} value={sug.q}>{sug.label}</option>)}
+              </select>
             </div>
 
             {/* Search Filters Bar */}
@@ -362,6 +358,7 @@ export function SearchPage() {
                   value={query}
                   onChange={(e) => {
                     setQuery(e.target.value);
+                    setSelectedHub('');
                     setVisibleCount(20);
                   }}
                   placeholder="e.g. 'PGs near PES University' or 'Vijaynagar'"
@@ -374,6 +371,7 @@ export function SearchPage() {
                 className="sk-button sk-button-primary"
                 onClick={() => {
                   setQuery('');
+                  setSelectedHub('');
                   setVisibleCount(20);
                 }}
                 data-testid="button-clear-filters"
@@ -386,38 +384,8 @@ export function SearchPage() {
 
         {/* Main Search Results Area */}
         <section className="sk-container py-8">
-          {/* Mobile View Switcher (List vs Map) */}
-          <div className="mb-4 flex rounded-xl bg-[#e5eff3] p-1 lg:hidden" role="tablist" aria-label="Search view mode">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mobileTab === 'list'}
-              onClick={() => setMobileTab('list')}
-              className={`flex-1 rounded-lg py-2 text-center text-xs font-bold transition-all ${
-                mobileTab === 'list'
-                  ? 'bg-white text-[#18364a] shadow-sm'
-                  : 'text-[#647782] hover:text-[#18364a]'
-              }`}
-            >
-              List View ({displayedProperties.length})
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mobileTab === 'map'}
-              onClick={() => setMobileTab('map')}
-              className={`flex-1 rounded-lg py-2 text-center text-xs font-bold transition-all ${
-                mobileTab === 'map'
-                  ? 'bg-white text-[#18364a] shadow-sm'
-                  : 'text-[#647782] hover:text-[#18364a]'
-              }`}
-            >
-              Map View ({visiblePins.length} Pins)
-            </button>
-          </div>
-
           <div className="grid gap-6 lg:grid-cols-[minmax(360px,0.86fr)_1.14fr]">
-            <aside className={mobileTab === 'map' ? 'hidden lg:block' : 'block'}>
+            <aside>
               <div className="mb-5">
                 <div>
                   <p className="sk-eyebrow">Available profiles</p>
@@ -488,22 +456,24 @@ export function SearchPage() {
                         <h3 className="sk-display text-[17px] font-bold text-[#1b1d18]">Verified PG <span className="font-sans text-[12px] text-[#77796f]">(1)</span></h3>
                         <p className="mt-1 text-[11px] text-[#77796f]">This is the only PG currently marked verified by StayKolo.</p>
                       </div>
-                      <article className="relative overflow-hidden rounded-[18px] border border-[#b2c957] bg-[#d6f36a] p-5 shadow-sm">
-                        <ShieldCheck aria-hidden="true" className="pointer-events-none absolute -left-3 top-4 z-0 h-32 w-32 text-[#748a35]/20" strokeWidth={1.1} />
-                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#526b1b]/[.16] via-[#d6f36a]/[.07] to-transparent" aria-hidden="true" />
-                        <div className="relative z-10">
-                          <span className="inline-flex items-center gap-1 rounded-full bg-[#1b1d18] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white"><ShieldCheck size={12} /> Verified by StayKolo</span>
-                          <h4 className="sk-display mt-3 text-[20px] font-bold text-[#1b1d18]">{verifiedPg.name}</h4>
-                          <p className="mt-1 text-[12px] leading-5 text-[#404432]">{verifiedPg.address}</p>
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            {standardAmenities.map((amenity) => <span key={amenity} className="rounded-full border border-[#526b1b]/20 bg-white/65 px-2.5 py-1 text-[10px] font-semibold text-[#313a1d]">{amenity}</span>)}
+                      <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2" aria-label="Verified PG carousel">
+                        <article className="relative w-[min(88vw,34rem)] shrink-0 snap-start overflow-hidden rounded-[18px] border border-[#b2c957] bg-[#d6f36a] p-5 shadow-sm">
+                          <ShieldCheck aria-hidden="true" className="pointer-events-none absolute -left-3 top-4 z-0 h-32 w-32 text-[#748a35]/20" strokeWidth={1.1} />
+                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#526b1b]/[.16] via-[#d6f36a]/[.07] to-transparent" aria-hidden="true" />
+                          <div className="relative z-10">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-[#1b1d18] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white"><ShieldCheck size={12} /> Verified by StayKolo</span>
+                            <h4 className="sk-display mt-3 text-[20px] font-bold text-[#1b1d18]">{verifiedPg.name}</h4>
+                            <p className="mt-1 text-[12px] leading-5 text-[#404432]">{verifiedPg.address}</p>
+                            <div className="mt-3 flex flex-wrap gap-2">
+                              {standardAmenities.map((amenity) => <span key={amenity} className="rounded-full border border-[#526b1b]/20 bg-white/65 px-2.5 py-1 text-[10px] font-semibold text-[#313a1d]">{amenity}</span>)}
+                            </div>
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              <Link href={`/pg/${verifiedPg.slug}`} className="inline-flex items-center gap-1 rounded-full bg-[#1b1d18] px-3.5 py-2 text-[10px] font-bold text-white">View details <ArrowRight size={12} /></Link>
+                              <a href={verifiedPg.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full border border-[#1b1d18]/25 bg-white/65 px-3.5 py-2 text-[10px] font-bold text-[#1b1d18]">Google Maps <ExternalLink size={11} /></a>
+                            </div>
                           </div>
-                          <div className="mt-4 flex flex-wrap gap-2">
-                            <Link href={`/pg/${verifiedPg.slug}`} className="inline-flex items-center gap-1 rounded-full bg-[#1b1d18] px-3.5 py-2 text-[10px] font-bold text-white">View details <ArrowRight size={12} /></Link>
-                            <a href={verifiedPg.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full border border-[#1b1d18]/25 bg-white/65 px-3.5 py-2 text-[10px] font-bold text-[#1b1d18]">Google Maps <ExternalLink size={11} /></a>
-                          </div>
-                        </div>
-                      </article>
+                        </article>
+                      </div>
                     </section>
                   )}
                   {[
@@ -547,13 +517,7 @@ export function SearchPage() {
             </aside>
 
             {/* Map View */}
-            <div className={`relative lg:sticky lg:top-[88px] lg:h-[calc(100dvh-160px)] ${mobileTab === 'list' ? 'hidden lg:block' : 'block'}`}>
-              {selectedProperty && mobileTab === 'map' && (
-                <div className="absolute left-3 right-3 top-3 z-20 rounded-xl border border-[#dedbd0] bg-[#f7f5ed]/95 p-3 shadow-lg lg:hidden" role="status">
-                  <p className="text-[12px] font-bold text-[#1b1d18]">{selectedProperty.name}</p>
-                  <p className="mt-0.5 text-[10px] text-[#686a61]">{selectedProperty.area}</p>
-                </div>
-              )}
+            <div className="relative hidden lg:sticky lg:top-[88px] lg:block lg:h-[calc(100dvh-160px)]">
               <MapView
                 pins={visiblePins}
                 selectedId={selected}
@@ -1247,15 +1211,75 @@ export function WebsiteProfilePage() {
 
   return <Shell><main className="sk-container py-10 sm:py-14"><div className="mx-auto max-w-2xl"><p className="sk-eyebrow">Website account</p><h1 className="sk-display mt-2 text-3xl font-bold text-[#1b1d18]">My profile</h1><p className="mt-2 text-sm text-[#686a61]">Manage the details attached to your StayKolo website profile.</p>
     <form onSubmit={save} className="mt-7 space-y-5 rounded-2xl border border-[#dedbd0] bg-[#f7f5ed] p-5 sm:p-7">
-      <div className="flex items-center gap-4">{photo ? <img src={photo} alt="Profile" className="h-16 w-16 rounded-full object-cover" /> : <span className="grid h-16 w-16 place-items-center rounded-full bg-[#d6f36a] text-2xl font-bold text-[#1b1d18]">{name.trim().charAt(0) || 'U'}</span>}<label className="text-xs font-semibold text-[#42443c]">Profile photo<input type="file" accept="image/*" className="mt-2 block w-full text-xs" onChange={(event) => {
-        const file = event.currentTarget.files?.[0];
-        if (!file) return;
-        if (file.size > 2 * 1024 * 1024) { setMessage('Choose an image smaller than 2 MB.'); return; }
-        const reader = new FileReader();
-        reader.onload = () => { if (typeof reader.result === 'string') { setPhoto(reader.result); setMessage(''); } };
-        reader.onerror = () => setMessage('The selected image could not be read.');
-        reader.readAsDataURL(file);
-      }} /></label></div>
+      <div className="flex items-center gap-4">
+        <div className="group relative h-16 w-16 shrink-0">
+          {photo ? <img src={photo} alt="Profile" className="h-16 w-16 rounded-full object-cover" /> : <span className="grid h-16 w-16 place-items-center rounded-full bg-[#d6f36a] text-2xl font-bold text-[#1b1d18]">{name.trim().charAt(0) || 'U'}</span>}
+          {photo && (
+            <button
+              type="button"
+              aria-label="Delete profile photo"
+              title="Delete profile photo"
+              onClick={() => {
+                if (!window.confirm('Are you sure you want to delete your profile photo?')) return;
+                const updatedProfile = { ...savedProfile, photo: undefined };
+                try {
+                  saveWebsiteProfile(updatedProfile);
+                  setSavedProfile(updatedProfile);
+                  setPhoto('');
+                  setMessage('Profile photo deleted.');
+                  window.dispatchEvent(new Event('staykolo:profile-updated'));
+                } catch {
+                  setMessage('Your profile photo could not be deleted. Please try again.');
+                }
+              }}
+              className="absolute inset-0 grid place-items-center rounded-full bg-red-700/75 text-white opacity-0 transition-opacity hover:bg-red-800/85 focus-visible:opacity-100 group-hover:opacity-100"
+            >
+              <Trash2 size={20} />
+            </button>
+          )}
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-[#42443c]">Profile photo</p>
+          <label htmlFor="profile-photo-upload" className="mt-2 inline-flex cursor-pointer items-center rounded-lg border border-[#d4d0c6] bg-white px-3 py-2 text-xs font-bold text-[#1b1d18] transition hover:border-[#829e39] hover:bg-[#e9f2cd]">
+            <input
+              id="profile-photo-upload"
+              type="file"
+              accept="image/*"
+              className="peer sr-only"
+              onChange={(event) => {
+                const input = event.currentTarget;
+                const file = input.files?.[0];
+                if (!file) return;
+                if (!file.type.startsWith('image/')) {
+                  setMessage('Choose a valid image file.');
+                  input.value = '';
+                  return;
+                }
+                if (file.size > 2 * 1024 * 1024) {
+                  setMessage('Choose an image smaller than 2 MB.');
+                  input.value = '';
+                  return;
+                }
+                const reader = new FileReader();
+                reader.onload = () => {
+                  if (typeof reader.result === 'string') {
+                    setPhoto(reader.result);
+                    setMessage('');
+                  } else {
+                    setMessage('The selected image could not be read.');
+                  }
+                };
+                reader.onerror = () => setMessage('The selected image could not be read.');
+                reader.onabort = () => setMessage('Reading the selected image was cancelled.');
+                reader.readAsDataURL(file);
+                input.value = '';
+              }}
+            />
+            <span className="peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#829e39]">Choose photo</span>
+          </label>
+          <p className="mt-1 text-[10px] text-[#77796f]">JPG, PNG or another image format · Max 2 MB</p>
+        </div>
+      </div>
       <Field label="Full name" name="profile-name" value={name} onChange={setName} placeholder="Your name" />
       <Field label="Phone number or email" name="profile-contact" value={contact} onChange={setContact} placeholder="Phone number or email" />
       <Field label="Email address" name="profile-email" value={email} onChange={setEmail} placeholder="you@example.com" />
@@ -1541,7 +1565,7 @@ export function ResetPasswordPage() {
 }
 
 function BlogCard({ item }: { item: typeof chronicles[number] }) {
-  return <article className="sk-card p-5 transition hover:border-[#829e39]"><div className="flex items-center justify-between gap-3"><span className="text-[11px] font-bold text-[#728f2c]">{item.tag.replace('#', '')}</span><span className="text-[11px] text-[#77796f]">{item.read}</span></div><h2 className="sk-display mt-5 text-[20px] font-bold leading-tight text-[#1b1d18]">{item.title}</h2><p className="mt-3 text-[13px] leading-6 text-[#686a61]">{item.copy}</p><p className="mt-5 text-[11px] font-semibold text-[#77796f]">{item.date}</p><Link href={`/blogs/article/${item.id}`} className="mt-5 inline-flex items-center gap-1 text-[12px] font-bold text-[#526b1b]">Read article <ArrowRight size={13} /></Link></article>;
+  return <article className="sk-card p-5 transition hover:border-[#829e39]"><div className="flex items-center justify-between gap-3"><span className="text-[11px] font-bold text-[#728f2c]">{item.tag.replace('#', '')}</span><span className="text-[11px] text-[#77796f]">{item.read}</span></div><h2 className="sk-display mt-5 text-[20px] font-bold leading-tight text-[#1b1d18]">{item.title}</h2><p className="mt-3 text-[13px] leading-6 text-[#686a61]">{item.copy}</p><p className="mt-5 text-[11px] font-semibold text-[#77796f]">{item.date}</p><div className="mt-5 flex flex-wrap gap-x-5 gap-y-2"><Link href={`/blogs/article/${item.id}`} className="inline-flex items-center gap-1 text-[12px] font-bold text-[#526b1b]">Read article <ArrowRight size={13} /></Link><Link href="/search" className="inline-flex items-center gap-1 text-[12px] font-bold text-[#526b1b]">Find a PG <ArrowRight size={13} /></Link><Link href="/faq" className="inline-flex items-center gap-1 text-[12px] font-bold text-[#526b1b]">PG FAQs <ArrowRight size={13} /></Link></div></article>;
 }
 export function BlogsPage() {
   const [active, setActive] = useState('all'); const list = active === 'all' ? chronicles : chronicles.filter((item) => item.tag === active);
@@ -1576,7 +1600,7 @@ export function BlogArticlePage() {
   if (!item) return <Shell><main className="sk-container min-h-[60vh] py-14"><p className="sk-eyebrow">Article not found</p><h1 className="sk-display mt-3 text-3xl font-bold">This article is not available.</h1><Link href="/blogs" className="sk-button sk-button-primary mt-6">Browse all blogs <ArrowRight size={15} /></Link></main></Shell>;
 
   const relatedArticles = chronicles.filter((article) => article.id !== item.id).slice(0, 3);
-  return <Shell><main><article className="mx-auto max-w-[900px] px-5 py-12 sm:px-8 sm:py-16"><Link href="/blogs" className="inline-flex items-center gap-1 text-[12px] font-bold text-[#1b1d18]"><ArrowLeft size={14} /> All articles</Link><header className="mt-9 border-b border-[#dedbd0] pb-8"><p className="sk-eyebrow">{item.tag.replace('#', '')} · {item.date} · {item.read}</p><h1 className="sk-display mt-3 text-[36px] font-bold leading-tight tracking-[-.04em] text-[#1b1d18] sm:text-[50px]">{item.title}</h1><p className="mt-5 text-[16px] leading-7 text-[#686a61]">{item.copy}</p></header><div className="prose-staykolo mt-8 space-y-8">{item.sections.map((section) => <section key={section.heading}><h2 className="sk-display text-[23px] font-bold text-[#1b1d18]">{section.heading}</h2><p className="mt-3 text-[15px] leading-7 text-[#55574e]">{section.content}</p></section>)}</div><section className="mt-10 rounded-[18px] border border-[#dedbd0] bg-[#eeebe2] p-5"><h2 className="text-[11px] font-bold uppercase tracking-[.12em] text-[#55574e]">Search topics</h2><p className="mt-3 text-[11px] font-bold text-[#526b1b]">Primary keywords</p><p className="mt-1 text-[12px] leading-6 text-[#686a61]">{item.primaryKeywords.join(' · ')}</p><p className="mt-3 text-[11px] font-bold text-[#526b1b]">Related keywords</p><p className="mt-1 text-[12px] leading-6 text-[#686a61]">{item.secondaryKeywords.join(' · ')}</p></section><section className="mt-8"><h2 className="sk-display text-xl font-bold text-[#1b1d18]">Keep exploring</h2><div className="mt-3 grid gap-3 sm:grid-cols-3">{relatedArticles.map((article) => <Link key={article.id} href={`/blogs/article/${article.id}`} className="rounded-xl border border-[#dedbd0] bg-[#f7f5ed] p-4 text-sm font-semibold text-[#1b1d18] hover:border-[#a5bd55]">{article.title}<span className="mt-2 block text-[10px] font-medium text-[#686a61]">{article.tag.replace('#', '')} · Read article</span></Link>)}</div><Link href="/search" className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-[#526b1b]">Explore available PG listings <ArrowRight size={13} /></Link></section></article></main></Shell>;
+  return <Shell><main><article className="mx-auto max-w-[900px] px-5 py-12 sm:px-8 sm:py-16"><Link href="/blogs" className="inline-flex items-center gap-1 text-[12px] font-bold text-[#1b1d18]"><ArrowLeft size={14} /> All articles</Link><header className="mt-9 border-b border-[#dedbd0] pb-8"><p className="sk-eyebrow">{item.tag.replace('#', '')} · {item.date} · {item.read}</p><h1 className="sk-display mt-3 text-[36px] font-bold leading-tight tracking-[-.04em] text-[#1b1d18] sm:text-[50px]">{item.title}</h1><p className="mt-5 text-[16px] leading-7 text-[#686a61]">{item.copy}</p></header><div className="prose-staykolo mt-8 space-y-8">{item.sections.map((section) => <section key={section.heading}><h2 className="sk-display text-[23px] font-bold text-[#1b1d18]">{section.heading}</h2><p className="mt-3 text-[15px] leading-7 text-[#55574e]">{section.content}</p></section>)}</div><section className="mt-8"><h2 className="sk-display text-xl font-bold text-[#1b1d18]">Keep exploring</h2><div className="mt-3 grid gap-3 sm:grid-cols-3">{relatedArticles.map((article) => <Link key={article.id} href={`/blogs/article/${article.id}`} className="rounded-xl border border-[#dedbd0] bg-[#f7f5ed] p-4 text-sm font-semibold text-[#1b1d18] hover:border-[#a5bd55]">{article.title}<span className="mt-2 block text-[10px] font-medium text-[#686a61]">{article.tag.replace('#', '')} · Read article</span></Link>)}</div><div className="mt-5 flex flex-wrap gap-x-5 gap-y-2"><Link href="/search" className="inline-flex items-center gap-2 text-xs font-bold text-[#526b1b]">Explore available PG listings <ArrowRight size={13} /></Link><Link href="/faq" className="inline-flex items-center gap-2 text-xs font-bold text-[#526b1b]">Read PG FAQs <ArrowRight size={13} /></Link><Link href="/contact" className="inline-flex items-center gap-2 text-xs font-bold text-[#526b1b]">Contact StayKolo <ArrowRight size={13} /></Link></div></section></article></main></Shell>;
 }
 
 const legalSections = {
