@@ -107,16 +107,16 @@ export function DashSidebar({ groups, header, footer }: { groups: SidebarGroup[]
     {/* Mobile hamburger */}
     <button type="button" className="fixed left-3 top-3 z-50 rounded-md border border-[#d8e3e7] bg-white p-2 text-[#355364] shadow-sm md:hidden" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'}>{open ? <X size={19} /> : <Menu size={19} />}</button>
     {open && <div className="fixed inset-0 z-40 bg-[#18364a]/30 md:hidden" onClick={() => setOpen(false)} />}
-    <aside className={`fixed left-0 top-0 z-40 flex h-[100dvh] w-[250px] flex-col border-r border-[#e1e8ed] bg-white transition-transform md:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
-      <div className="flex h-[60px] items-center border-b border-[#e1e8ed] px-5"><Logo /></div>
-      {header && <div className="border-b border-[#e1e8ed] px-4 py-3">{header}</div>}
+    <aside className={`fixed left-0 top-0 z-40 flex h-[100dvh] w-[250px] flex-col border-r border-[#dedbd0] bg-[#f7f5ed] transition-transform md:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className="flex h-[60px] items-center border-b border-[#dedbd0] px-5"><Logo /></div>
+      {header && <div className="border-b border-[#dedbd0] px-4 py-3">{header}</div>}
       <nav ref={navRef} className="flex-1 overflow-y-auto px-3 py-4" aria-label="Dashboard sidebar">
         {groups.map((g) => <div key={g.title} className="mb-5"><p className="mb-2 px-2 text-[10px] font-bold uppercase tracking-[.12em] text-[#81909a]">{g.title}</p>{g.items.filter((i) => !i.hidden).map((i) => {
           const active = loc === i.href || (i.href !== '/' && loc.startsWith(i.href));
-          return <Link key={i.href} href={i.href} onClick={() => handleNavClick(open)} className={`mb-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-semibold transition-colors ${active ? 'bg-[#edf7fa] text-[#0878b0]' : 'text-[#506875] hover:bg-[#f5f8f9]'}`}>{i.icon}<span>{i.label}</span></Link>;
+          return <Link key={i.href} href={i.href} onClick={() => handleNavClick(open)} className={`mb-0.5 flex items-center gap-2.5 rounded-md px-2.5 py-2 text-[13px] font-semibold transition-colors ${active ? 'bg-[#e9f2cd] text-[#526b1b]' : 'text-[#55574e] hover:bg-[#eeebe2]'}`}>{i.icon}<span>{i.label}</span></Link>;
         })}</div>)}
       </nav>
-      {footer && <div className="border-t border-[#e1e8ed] px-4 py-3">{footer}</div>}
+      {footer && <div className="border-t border-[#dedbd0] px-4 py-3">{footer}</div>}
     </aside>
   </>;
 }
@@ -132,7 +132,7 @@ export function TenantLayout({ children, tabs }: { children: ReactNode; tabs: Ta
 }
 
 export function AdminLayout({ children, sidebarGroups, header }: { children: ReactNode; sidebarGroups: SidebarGroup[]; header?: ReactNode }) {
-  return <div className="min-h-[100dvh] bg-[#fbfcfd]">
+  return <div className="sk-admin-theme min-h-[100dvh] bg-[#f4f1e9]">
     <DashSidebar groups={sidebarGroups} header={header} footer={<Link href="/" className="flex items-center gap-2 text-[12px] font-semibold text-[#b55b25]"><LogOut size={14} /> Sign out</Link>} />
     <main className="md:ml-[250px]"><div className="mx-auto max-w-[1200px] px-4 py-6 pt-14 sm:px-6 md:py-8 md:pt-8">{children}</div></main>
   </div>;

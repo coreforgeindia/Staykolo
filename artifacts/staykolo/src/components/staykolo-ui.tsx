@@ -1,41 +1,84 @@
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useEffect, useState } from 'react';
 import { Link } from 'wouter';
 import { ArrowRight, Check, ChevronDown, CircleAlert, Clock3, House, Menu, Search, ShieldCheck, SlidersHorizontal, X } from 'lucide-react';
 
+type WebsiteProfile = { name: string; contact: string; email?: string; photo?: string };
+
+function readWebsiteProfile(): WebsiteProfile | null {
+  try {
+    const raw = localStorage.getItem('staykolo.websiteProfile');
+    if (!raw) return null;
+    const value: unknown = JSON.parse(raw);
+    if (typeof value !== 'object' || value === null) return null;
+    const profile = value as Record<string, unknown>;
+    return typeof profile.name === 'string' && typeof profile.contact === 'string'
+      ? { name: profile.name, contact: profile.contact, email: typeof profile.email === 'string' ? profile.email : undefined, photo: typeof profile.photo === 'string' ? profile.photo : undefined }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
 export function Logo() {
-  return <Link href="/" className="inline-flex items-center gap-0.5 text-[20px] font-extrabold tracking-[-0.06em] text-[#18364a]" data-testid="link-logo" aria-label="Staykolo home">staykolo<span className="mt-1 h-1.5 w-1.5 rounded-full bg-[#1c9bd0]" aria-hidden="true" /></Link>;
+  return <Link href="/" className="inline-flex items-center gap-2 text-[20px] font-extrabold tracking-[-0.06em] text-[#1b1d18]" data-testid="link-logo" aria-label="StayKolo home"><span className="grid h-8 w-8 place-items-center rounded-full bg-[#d6f36a] text-[14px] font-black tracking-[-.08em]">s.</span>staykolo.</Link>;
 }
 
 const navItems = [
-  { href: '/search', label: 'StayKolo PG Locator' },
-  { href: '/chronicles', label: 'Chronicles' },
-  { href: '/about', label: 'How it works' },
+  { href: '/search', label: 'Find a PG' },
+  { href: '/blogs', label: 'Blogs' },
   { href: '/contact', label: 'Contact Us' },
 ];
 
 export function SiteNav() {
   const [open, setOpen] = useState(false);
-  return <header className="sticky top-0 z-30 border-b border-[#e1e8ed] bg-white/95 backdrop-blur-sm">
+  const [profile, setProfile] = useState<WebsiteProfile | null>(() => readWebsiteProfile());
+  const defaultProfile: WebsiteProfile = { name: 'My profile', contact: '' };
+
+  useEffect(() => {
+    const refresh = () => setProfile(readWebsiteProfile());
+    window.addEventListener('storage', refresh);
+    window.addEventListener('staykolo:profile-updated', refresh);
+    return () => {
+      window.removeEventListener('storage', refresh);
+      window.removeEventListener('staykolo:profile-updated', refresh);
+    };
+  }, []);
+
+  return <header className="sticky top-0 z-30 border-b border-[#e5e1d7] bg-[#f4f1e9]/95 text-[#1b1d18] backdrop-blur-sm">
     <div className="sk-container flex h-[72px] items-center justify-between">
-      <div className="flex items-center gap-10"><Logo /><span className="hidden border-l border-[#d9e2e8] pl-10 text-[12px] text-[#6e7d87] md:block">All at one click.</span></div>
+      <div className="flex items-center gap-10"><Logo /><span className="hidden border-l border-[#d8d4ca] pl-10 text-[12px] text-[#77796f] md:block">A better place to land.</span></div>
       <nav className="hidden items-center gap-7 md:flex" aria-label="Primary navigation">
-        {navItems.map((item) => <Link key={item.href} href={item.href} className="text-[13px] font-semibold text-[#4d626f] transition-colors hover:text-[#0878b0]" data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`}>{item.label}</Link>)}
+        {navItems.map((item) => <Link key={item.href} href={item.href} className="text-[13px] font-semibold text-[#5e6058] transition-colors hover:text-[#1b1d18]" data-testid={`link-nav-${item.label.toLowerCase().replaceAll(' ', '-')}`}>{item.label}</Link>)}
       </nav>
       <div className="hidden items-center gap-2 md:flex">
-        <Link href="/contact?tab=verify" className="sk-button sk-button-quiet text-[#0878b0] font-bold border border-[#bde0ee] bg-[#edf7fa] hover:bg-[#d8eef7]" data-testid="link-get-verified">
-          <ShieldCheck size={14} className="text-[#0878b0]" /> Get Verified
+        {profile ? <Link href="/profile" className="inline-flex items-center gap-2 rounded-full border border-[#d4d0c6] bg-[#f7f5ed] py-1 pl-1 pr-3 text-[12px] font-semibold"><Avatar profile={profile} /> My profile</Link> : <Link href="/auth/login" className="sk-button sk-button-secondary" data-testid="link-sign-in">Sign in / Sign up</Link>}
+        <Link href="/contact?tab=verify" className="sk-button border border-[#1b1d18] bg-[#1b1d18] text-white hover:bg-[#3a3d32]" data-testid="link-get-verified">
+          <ShieldCheck size={14} /> List your property
         </Link>
-        <Link href="/auth/sign-in" className="sk-button sk-button-secondary" data-testid="link-sign-in">Sign in</Link>
       </div>
-      <button className="rounded-md p-2 text-[#355364] md:hidden" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} data-testid="button-mobile-menu">{open ? <X size={21} /> : <Menu size={21} />}</button>
+      <div className="flex items-center gap-2 md:hidden">
+        <Link href={profile ? '/profile' : '/auth/login'} className="flex items-center justify-center rounded-full border border-[#d4d0c6] bg-[#f7f5ed] p-1 shadow-sm transition-colors hover:border-[#1b1d18]" aria-label={profile ? 'My profile' : 'Sign in / Sign up'}>
+          <Avatar profile={profile ?? defaultProfile} className="h-8 w-8 border border-white" />
+        </Link>
+        <button className="rounded-md p-2 text-[#1b1d18]" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'} aria-expanded={open} data-testid="button-mobile-menu">{open ? <X size={21} /> : <Menu size={21} />}</button>
+      </div>
     </div>
-    {open && <nav className="border-t border-[#e1e8ed] bg-white px-4 py-3 md:hidden" aria-label="Mobile navigation">
-      {navItems.map((item) => <Link onClick={() => setOpen(false)} key={item.href} href={item.href} className="block border-b border-[#eef2f4] px-2 py-3 text-sm font-semibold text-[#355364]" data-testid={`mobile-link-${item.label.toLowerCase().replaceAll(' ', '-')}`}>{item.label}</Link>)}
-      <Link onClick={() => setOpen(false)} href="/contact?tab=verify" className="mt-3 block text-sm font-bold text-[#0878b0] flex items-center gap-1.5" data-testid="mobile-link-get-verified">
-        <ShieldCheck size={15} /> Get Verified (List Your PG)
+    {open && <nav className="border-t border-[#e5e1d7] bg-[#f4f1e9] px-4 py-3 md:hidden" aria-label="Mobile navigation">
+      {navItems.map((item) => <Link onClick={() => setOpen(false)} key={item.href} href={item.href} className="block border-b border-[#e5e1d7] px-2 py-3 text-sm font-semibold text-[#383a33]" data-testid={`mobile-link-${item.label.toLowerCase().replaceAll(' ', '-')}`}>{item.label}</Link>)}
+      <Link onClick={() => setOpen(false)} href={profile ? '/profile' : '/auth/login'} className="mt-3 block text-sm font-bold text-[#1b1d18]">{profile ? 'My profile' : 'Sign in / Sign up'}</Link>
+      <Link onClick={() => setOpen(false)} href="/contact?tab=verify" className="mt-3 block text-sm font-bold text-[#1b1d18]" data-testid="mobile-link-list-property">
+        List your property
       </Link>
     </nav>}
   </header>;
+}
+
+function Avatar({ profile, className = '' }: { profile: WebsiteProfile; className?: string }) {
+  const baseClasses = className ? ` ${className}` : '';
+
+  return profile.photo
+    ? <img src={profile.photo} alt="" className={`h-8 w-8 rounded-full object-cover${baseClasses}`} />
+    : <span className={`grid h-8 w-8 place-items-center rounded-full bg-[#d6f36a] text-[12px] font-bold uppercase text-[#1b1d18]${baseClasses}`} aria-hidden="true">{profile.name.trim().charAt(0) || 'U'}</span>;
 }
 
 export function KarnatakaFlag({
@@ -72,27 +115,23 @@ export function BrandKarnatakaBadge({ className = '' }: { className?: string }) 
 }
 
 export function SiteFooter() {
-  return <footer className="border-t border-[#dfe7eb] bg-[#f5f8f9]">
-    <div className="sk-container grid gap-10 py-10 md:grid-cols-[1.35fr_1fr_1fr_1fr_1fr]">
-      <div><Logo /><p className="mt-4 max-w-[240px] text-[13px] leading-6 text-[#6d7e88]">A clearer way to find and run well-managed PG accommodation in Bengaluru.</p></div>
-      <FooterGroup title="Explore" links={[['Find a PG','/search'],['Chronicles','/chronicles'],['How it works','/about']]} />
-      <FooterGroup title="For property teams" links={[['List your property','/contact'],['Contact us','/contact']]} />
-      <FooterGroup title="Account" links={[['Sign in','/auth/sign-in'],['Your shortlist','/user/saved']]} />
-      <FooterGroup title="Legal" links={[['Terms','/legal/terms'],['Privacy','/legal/privacy'],['Data deletion','/legal/data-deletion']]} />
-    </div>
-    <div className="sk-container flex flex-col gap-3 border-t border-[#dfe7eb] py-5 text-[11px] text-[#81909a] sm:flex-row sm:items-center sm:justify-between">
-      <div className="flex flex-wrap items-center gap-3">
-        <span>© 2025 Staykolo. CoreForge product systems.</span>
-        {/* Karnataka flag — Brand Karnataka (#16) */}
-        <BrandKarnatakaBadge />
-      </div>
-      <span>PG findings made easy in Bengaluru · First phase launch</span>
+  return <footer className="border-t border-[#e1ddd3] bg-[#f4f1e9] text-[#1b1d18]">
+    <div className="sk-container flex flex-col gap-5 py-7 text-[11px] text-[#77796f] sm:flex-row sm:items-center sm:justify-between">
+      <Link href="/" className="inline-flex items-center gap-2 text-[16px] font-extrabold tracking-[-.07em] text-[#1b1d18]"><span className="grid h-7 w-7 place-items-center rounded-full bg-[#d6f36a] text-[14px] font-black">s.</span>staykolo.</Link>
+      <p>Clearer PG listings, right here in Bengaluru.</p>
+      <nav className="flex flex-wrap gap-x-5 gap-y-2 font-semibold" aria-label="Footer links">
+        <Link href="/search" className="hover:text-[#1b1d18]">Find a stay</Link>
+        <Link href="/blogs" className="hover:text-[#1b1d18]">Blogs</Link>
+        <Link href="/contact" className="hover:text-[#1b1d18]">Contact</Link>
+        <Link href="/legal/terms" className="hover:text-[#1b1d18]">Terms &amp; Conditions</Link>
+        <Link href="/legal/privacy" className="hover:text-[#1b1d18]">Privacy</Link>
+      </nav>
     </div>
   </footer>;
 }
 
 function FooterGroup({ title, links }: { title: string; links: string[][] }) {
-  return <div><p className="mb-3 text-[11px] font-bold uppercase tracking-[.12em] text-[#8a99a2]">{title}</p>{links.map(([label, href]) => <Link className="mb-2 block w-fit text-[13px] text-[#4d626f] hover:text-[#0878b0]" href={href} key={href + label} data-testid={`footer-link-${label.toLowerCase().replaceAll(' ', '-')}`}>{label}</Link>)}</div>;
+  return <div><p className="mb-3 text-[11px] font-bold uppercase tracking-[.12em] text-[#77796f]">{title}</p>{links.map(([label, href]) => <Link className="mb-2 block w-fit text-[13px] text-[#4c4e46] hover:text-[#1b1d18]" href={href} key={href + label} data-testid={`footer-link-${label.toLowerCase().replaceAll(' ', '-')}`}>{label}</Link>)}</div>;
 }
 
 export function SectionHeading({ eyebrow, title, copy, action }: { eyebrow: string; title: string; copy?: string; action?: ReactNode }) {

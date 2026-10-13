@@ -1,11 +1,11 @@
-import { type ReactNode } from 'react';
+import { type ReactNode, useEffect } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
-import { Home } from '@/pages/home';
-import { AboutPage, ChronicleTagPage, ChroniclesPage, ContactPage, ForgotPasswordPage, LegalPage, LoginPage, PropertyDetail, ResetPasswordPage, SearchPage, SignupPage } from '@/pages/app-pages';
+import { Home2 } from '@/pages/home2';
+import { BlogArticlePage, BlogTagPage, BlogsPage, ContactPage, ForgotPasswordPage, LegalPage, LoginPage, PropertyDetail, ResetPasswordPage, SearchPage, WebsiteProfilePage } from '@/pages/app-pages';
 import { UserDashboard } from '@/pages/user-dashboard';
 import { StaffDashboard } from '@/pages/staff-dashboard';
 import { AdminDashboard } from '@/pages/admin-dashboard';
@@ -22,23 +22,26 @@ const queryClient = new QueryClient();
 function Router() {
   return (
     <RoutedErrorBoundary>
+      <RouteScrollToTop />
       <Switch>
         {/* Public site */}
-        <Route path="/" component={Home} />
+        <Route path="/" component={Home2} />
+        <Route path="/home2" component={Home2} />
         <Route path="/search" component={SearchPage} />
         <Route path="/pg/:slug" component={PropertyDetail} />
-        <Route path="/chronicles" component={ChroniclesPage} />
-        <Route path="/chronicles/:tag" component={ChronicleTagPage} />
-        <Route path="/about" component={AboutPage} />
+        <Route path="/blogs/article/:slug" component={BlogArticlePage} />
+        <Route path="/blogs/:tag" component={BlogTagPage} />
+        <Route path="/blogs" component={BlogsPage} />
         <Route path="/contact" component={ContactPage} />
         <Route path="/get-verified" component={ContactPage} />
+        <Route path="/profile" component={WebsiteProfilePage} />
         <Route path="/legal/terms"><LegalPage kind="terms" /></Route>
         <Route path="/legal/privacy"><LegalPage kind="privacy" /></Route>
         <Route path="/legal/data-deletion"><LegalPage kind="deletion" /></Route>
 
         {/* Auth */}
-        <Route path="/auth/signup" component={SignupPage} />
-        <Route path="/auth/register" component={SignupPage} />
+        <Route path="/auth/signup" component={LoginPage} />
+        <Route path="/auth/register" component={LoginPage} />
         <Route path="/auth/login" component={LoginPage} />
         <Route path="/auth/sign-in" component={LoginPage} />
         <Route path="/auth/signin" component={LoginPage} />
@@ -157,6 +160,14 @@ function Router() {
       </Switch>
     </RoutedErrorBoundary>
   );
+}
+
+function RouteScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location]);
+  return null;
 }
 
 function RoutedErrorBoundary({ children }: { children: ReactNode }) {

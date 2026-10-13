@@ -60,28 +60,29 @@ export function MapView({ pins, selectedId, onSelect, center, className = '' }: 
   }, [pins, selectedId, onSelect, center]);
 
   if (mapUnavailable) {
-    return <FallbackMap pins={pins} selectedId={selectedId} onSelect={onSelect} className={className} />;
+    return <FallbackMap pins={pins} selectedId={selectedId} onSelect={onSelect} center={center} className={className} />;
   }
 
-  return <div ref={containerRef} className={`relative min-h-[320px] overflow-hidden rounded-[14px] border border-[#cbdde3] bg-[#e6f0f1] ${className}`} aria-label="Map of Bengaluru properties" data-testid="map-properties">
-    <div className="pointer-events-none absolute bottom-3 left-3 z-10 flex items-center gap-1.5 rounded-md border border-[#d3e0e3] bg-white/90 px-2.5 py-1.5 text-[10px] font-semibold text-[#58717c]"><MapPin size={12} className="text-[#0878b0]" /> Bengaluru area</div>
+  return <div ref={containerRef} className={`staykolo-map relative min-h-[320px] overflow-hidden rounded-[14px] border border-[#d4d0c6] bg-[#eeebe2] ${className}`} aria-label="Map of Bengaluru properties" data-testid="map-properties">
+    <div className="pointer-events-none absolute bottom-3 left-3 z-10 flex items-center gap-1.5 rounded-md border border-[#dedbd0] bg-[#f7f5ed]/90 px-2.5 py-1.5 text-[10px] font-semibold text-[#55574e]"><MapPin size={12} className="text-[#728f2c]" /> Bengaluru area</div>
   </div>;
 }
 
-function FallbackMap({ pins, selectedId, onSelect, className }: { pins: Pin[]; selectedId?: string; onSelect?: (id: string) => void; className?: string }) {
-  const left = 77.56;
-  const right = 77.8;
-  const top = 13.05;
-  const bottom = 12.88;
+function FallbackMap({ pins, selectedId, onSelect, center, className }: { pins: Pin[]; selectedId?: string; onSelect?: (id: string) => void; center?: [number, number]; className?: string }) {
+  const [centerLng, centerLat] = center ?? [77.68, 12.965];
+  const left = centerLng - 0.12;
+  const right = centerLng + 0.12;
+  const top = centerLat + 0.085;
+  const bottom = centerLat - 0.085;
   const xFor = (lng: number) => Math.min(92, Math.max(8, ((lng - left) / (right - left)) * 100));
   const yFor = (lat: number) => Math.min(88, Math.max(12, ((top - lat) / (top - bottom)) * 100));
 
-  return <div className={`relative min-h-[320px] overflow-hidden rounded-[14px] border border-[#cbdde3] bg-[#e9f3f2] ${className}`} aria-label="Interactive map preview of Bengaluru properties" data-testid="map-properties">
-    <div className="absolute inset-0 opacity-70" aria-hidden="true" style={{ backgroundImage: 'linear-gradient(28deg, transparent 48%, rgba(112,163,164,.22) 49%, transparent 51%), linear-gradient(118deg, transparent 47%, rgba(112,163,164,.18) 48%, transparent 51%), linear-gradient(rgba(255,255,255,.62) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.62) 1px, transparent 1px)', backgroundSize: '100% 100%, 100% 100%, 46px 46px, 46px 46px' }} />
-    <div className="absolute left-[18%] top-[19%] h-[52%] w-[52%] rotate-12 rounded-[48%] border border-[#a6d1cb] bg-[#d5ece5]/70" aria-hidden="true" />
+  return <div className={`staykolo-map relative min-h-[320px] overflow-hidden rounded-[14px] border border-[#d4d0c6] bg-[#eeebe2] ${className}`} aria-label="Interactive map preview of Bengaluru properties" data-testid="map-properties">
+    <div className="absolute inset-0 opacity-70" aria-hidden="true" style={{ backgroundImage: 'linear-gradient(28deg, transparent 48%, rgba(117,125,95,.2) 49%, transparent 51%), linear-gradient(118deg, transparent 47%, rgba(117,125,95,.16) 48%, transparent 51%), linear-gradient(rgba(255,255,255,.62) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.62) 1px, transparent 1px)', backgroundSize: '100% 100%, 100% 100%, 46px 46px, 46px 46px' }} />
+    <div className="absolute left-[18%] top-[19%] h-[52%] w-[52%] rotate-12 rounded-[48%] border border-[#bdc99c] bg-[#dfe8c5]/70" aria-hidden="true" />
     {pins.map((pin) => <button key={pin.id} type="button" aria-label={`Select ${pin.name}`} onClick={() => onSelect?.(pin.id)} className={`absolute z-10 -translate-x-1/2 -translate-y-full transition-transform hover:scale-110 ${pin.id === selectedId ? 'scale-110' : ''}`} style={{ left: `${xFor(pin.lng)}%`, top: `${yFor(pin.lat)}%` }} data-testid={`fallback-map-pin-${pin.id}`}>
-      <span className={`flex h-8 w-8 rotate-45 items-center justify-center rounded-full rounded-bl-none border-2 border-white shadow-[0_2px_7px_rgba(28,65,87,.24)] ${pin.id === selectedId ? 'bg-[#168a8d]' : 'bg-[#0878b0]'}`}><span className="h-2 w-2 -rotate-45 rounded-full bg-white" /></span>
+      <span className={`flex h-8 w-8 rotate-45 items-center justify-center rounded-full rounded-bl-none border-2 border-white shadow-[0_2px_7px_rgba(27,29,24,.24)] ${pin.id === selectedId ? 'bg-[#829e39]' : 'bg-[#1b1d18]'}`}><span className="h-2 w-2 -rotate-45 rounded-full bg-white" /></span>
     </button>)}
-    <div className="absolute bottom-3 left-3 z-20 flex items-center gap-1.5 rounded-md border border-[#d3e0e3] bg-white/90 px-2.5 py-1.5 text-[10px] font-semibold text-[#58717c]"><MapPin size={12} className="text-[#0878b0]" /> Bengaluru area · map preview</div>
+    <div className="absolute bottom-3 left-3 z-20 flex items-center gap-1.5 rounded-md border border-[#dedbd0] bg-[#f7f5ed]/90 px-2.5 py-1.5 text-[10px] font-semibold text-[#55574e]"><MapPin size={12} className="text-[#728f2c]" /> Bengaluru area · map preview</div>
   </div>;
 }

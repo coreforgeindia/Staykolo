@@ -1,30 +1,45 @@
 import { type FormEvent, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation, useParams } from 'wouter';
 import {
-  ArrowLeft, ArrowRight, Check, CheckCircle, ChevronDown, CircleAlert, Compass, ExternalLink, Eye, EyeOff, FileText,
-  Gift, GraduationCap, Heart, Home, Info, Mail, MapPin, Navigation, Phone, RotateCcw, Scale, Search, ShieldCheck,
+  ArrowLeft, ArrowRight, Check, CheckCircle, ChevronDown, CircleAlert, ExternalLink, Eye, EyeOff, FileText,
+  Fan, Gift, GraduationCap, Heart, Home, Info, Mail, MapPin, Navigation, Phone, RotateCcw, Scale, Search, ShieldCheck,
+  Droplets, Wifi,
   SlidersHorizontal, Sparkles, User, UserCheck, UserRound, Users, Wrench, X,
 } from 'lucide-react';
 import { MapView } from '@/components/map-view';
-import { Interactive360View, Modal360 } from '@/components/view-360';
 import { BrandKarnatakaBadge, KarnatakaFlag, SectionHeading, SiteFooter, SiteNav } from '@/components/staykolo-ui';
+import { isStaykoloVerified, standardAmenities, verifiedPg } from '@/lib/public-listings';
 import pgsJson from '../../mock-data/pgs.json';
 
 type PG = (typeof pgsJson)[number];
 type ModalProps = { onClose: () => void; children: React.ReactNode; title: string };
 const pgs = pgsJson as PG[];
 const chronicles = [
-  { id: 'c1', tag: '#tenant-tips', title: 'A practical checklist for your first PG visit', date: '18 Feb 2025', read: '5 min read', copy: 'What to look for beyond the room: water pressure, notice periods, visitor rules and the questions worth asking before you pay a deposit.' },
-  { id: 'c2', tag: '#tenant-tips', title: 'Choosing a Bengaluru area around your commute', date: '11 Feb 2025', read: '4 min read', copy: 'HSR Layout, Bellandur, Indiranagar and Whitefield each solve a different commute. Start with the route, not the pin on a map.' },
-  { id: 'c3', tag: '#owner-guides', title: 'The property details residents ask for first', date: '06 Feb 2025', read: '6 min read', copy: 'A useful property profile answers rent, deposit, room format, house rules and move-in logistics before a call is made.' },
-  { id: 'c4', tag: '#owner-guides', title: 'Keeping availability information current', date: '28 Jan 2025', read: '3 min read', copy: 'A small operating habit that saves time for property teams and prevents avoidable conversations with prospective residents.' },
-  { id: 'c5', tag: '#staykolo-updates', title: 'Why Staykolo uses verification notes, not star ratings', date: '21 Jan 2025', read: '4 min read', copy: 'We are building for clearer decisions, so property details and verification context come before invented certainty.' },
-  { id: 'c6', tag: '#staykolo-updates', title: 'A clearer start for Bengaluru renting', date: '14 Jan 2025', read: '2 min read', copy: 'Staykolo begins with a simple promise: make the practical information about a PG easier to find and easier to compare.' },
+  { id: 'bengaluru-pg-visit-checklist', tag: '#tenant-tips', title: 'Bengaluru PG Visit Checklist: What to Check Before You Decide', date: 'Updated 2026', read: '6 min read', copy: 'A practical room-visit checklist for checking water, Wi-Fi, safety, rules and the everyday details that matter before choosing a paying guest stay.', primaryKeywords: ['Bengaluru PG visit checklist', 'questions to ask before booking a PG'], secondaryKeywords: ['PG inspection checklist', 'paying guest accommodation Bengaluru', 'PG safety checklist', 'PG house rules', 'what to check in a PG room', 'PG visit questions', 'PG facilities checklist'], sections: [{ heading: 'Check the essentials in person', content: 'Visit at a time that lets you see the building entrance, common areas and the route you would use each day. Ask how water is supplied and when it is available, test the Wi-Fi where you expect to work or study, and check fans, lights, sockets and bathroom ventilation. A listing can help you find a place, but a visit helps you confirm what is actually present.' }, { heading: 'Ask about routines and rules', content: 'Request a clear explanation of meal arrangements if offered, visitor access, quiet hours, cleaning, laundry, maintenance requests and notice expectations. Ask who to contact when something stops working and how quickly urgent issues are handled. Write down anything important rather than relying on a verbal promise.' }, { heading: 'Take time before committing', content: 'Read every written term and confirm the address and contact person independently. Do not transfer money under pressure or share account passwords or one-time codes. If an amount, room arrangement or facility is not documented, ask for written confirmation before treating it as agreed.' }] },
+  { id: 'choose-bengaluru-pg-location', tag: '#tenant-tips', title: 'How to Choose a Bengaluru PG Location Around Your Commute', date: 'Updated 2026', read: '5 min read', copy: 'Compare neighbourhoods by your real daily route, first- and last-mile options, essential services and the time you need to get home.', primaryKeywords: ['Bengaluru PG near work', 'best area to stay in Bengaluru'], secondaryKeywords: ['PG near office Bengaluru', 'Bengaluru commute planning', 'PG near metro Bengaluru', 'HSR Layout PG search', 'Whitefield accommodation', 'Koramangala PG location', 'Indiranagar commute', 'Bengaluru neighbourhood guide'], sections: [{ heading: 'Start with your actual destination', content: 'Map the route from a shortlisted address to your office, college or regular appointment, not just to the centre of a neighbourhood. Check the route at the hours you usually travel and consider walking time at both ends. A short straight-line distance can still mean a complicated daily trip.' }, { heading: 'Compare the last mile', content: 'Look beyond a single transport option. Check nearby bus stops, metro access where available, safe walking routes and how you would reach home after your usual schedule. Visit the street itself and note lighting, traffic and the availability of everyday services such as groceries and pharmacies.' }, { heading: 'Choose for your routine', content: 'HSR Layout, Whitefield, Koramangala, Indiranagar and other Bengaluru localities suit different commutes and routines. There is no universally best area. Compare verified address details and visit the exact lane before deciding; do not rely on a broad area label alone.' }] },
+  { id: 'pg-rental-questions-bengaluru', tag: '#tenant-tips', title: 'Questions to Ask Before Moving Into a PG in Bengaluru', date: 'Updated 2026', read: '5 min read', copy: 'Use these clear questions to understand responsibilities, facilities, access and move-in expectations before you agree to stay.', primaryKeywords: ['questions to ask before moving into a PG', 'PG accommodation Bengaluru'], secondaryKeywords: ['PG move in questions', 'PG agreement questions', 'PG facilities Bengaluru', 'paying guest house rules', 'PG maintenance contact', 'PG notice policy', 'PG water Wi-Fi facilities'], sections: [{ heading: 'Clarify what your stay includes', content: 'Ask which facilities are available to residents and whether their use has conditions. Confirm water access, Wi-Fi coverage, fan and appliance availability, cleaning arrangements and how shared spaces are maintained. Ask to see the actual room and facilities rather than assuming every room or floor is the same.' }, { heading: 'Understand access and responsibilities', content: 'Find out how keys or entry access work, whom to call for repairs, how visitors are handled and what quiet-hour or shared-space rules apply. Ask what you are expected to keep clean and how maintenance concerns are recorded. Clear expectations help both residents and operators avoid misunderstandings.' }, { heading: 'Get important terms in writing', content: 'Before you pay or move belongings, request a written summary of the agreed stay, amounts and timing, notice terms, included services and any applicable refund conditions. Review the document carefully and keep a copy of receipts and messages. Do not rely on assumptions based on another resident’s arrangement.' }] },
+  { id: 'pg-moving-day-checklist', tag: '#tenant-tips', title: 'PG Moving Day Checklist for a Smooth Bengaluru Move', date: 'Updated 2026', read: '4 min read', copy: 'Plan documents, essentials, travel timing and a condition check so your first day in a new paying guest stay is less stressful.', primaryKeywords: ['PG moving day checklist', 'moving to Bengaluru PG'], secondaryKeywords: ['PG packing list', 'Bengaluru move in checklist', 'first day in a PG', 'PG documents to carry', 'paying guest move in', 'student moving to Bengaluru'], sections: [{ heading: 'Prepare the essentials', content: 'Confirm the address, arrival time and contact person the day before. Keep identification, written agreements, payment receipts and important phone numbers accessible. Pack daily-use clothes, personal medication, chargers, toiletries and a small set of bedding or utensils only after checking what the property already provides.' }, { heading: 'Record the room condition', content: 'On arrival, inspect the door, windows, lights, fan, sockets and bathroom. Photograph any pre-existing damage for your own records and report it promptly through the agreed channel. Test the Wi-Fi and ask how to raise maintenance requests, rather than waiting until a problem becomes urgent.' }, { heading: 'Settle into the neighbourhood', content: 'Locate the nearest grocery shop, pharmacy and reliable route to your regular destination. Save the property contact and a trusted personal contact. Take time to learn shared-space rules and introduce yourself to the relevant operator or warden so you know where to get help.' }] },
+  { id: 'pg-wifi-water-amenities-check', tag: '#tenant-tips', title: 'How to Check PG Wi-Fi, Water and Everyday Facilities', date: 'Updated 2026', read: '4 min read', copy: 'A straightforward way to ask about essential PG facilities without assuming that a listed amenity is available everywhere or at all times.', primaryKeywords: ['PG Wi-Fi and water facilities', 'check amenities before booking PG'], secondaryKeywords: ['PG Wi-Fi coverage', 'PG water availability', 'PG fan facilities', 'paying guest amenities', 'check PG facilities in person', 'PG internet for work', 'PG maintenance questions'], sections: [{ heading: 'Test connectivity where you need it', content: 'Ask whether Wi-Fi is available in the room as well as common areas, and test it from the place you expect to use a laptop or make calls. Ask how residents report outages and whether there are known limits. Do not assume that a signal near reception represents coverage throughout a building.' }, { heading: 'Ask specifically about water', content: 'Confirm the usual water arrangement, storage and how residents are informed about maintenance interruptions. Check taps and bathroom fixtures during your visit. If you have a particular schedule or accessibility need, ask how the normal supply pattern fits that routine.' }, { heading: 'Confirm each facility, not the label', content: 'Walk through the room and common areas and identify the fan, lights and other facilities you expect to use. Ask whether shared equipment has a usage schedule or separate rule. Keep the discussion factual: a directory listing is not a substitute for checking a facility at the property.' }] },
+  { id: 'pg-safety-checklist', tag: '#tenant-tips', title: 'PG Safety Checklist: Access, Visitors and Emergency Contacts', date: 'Updated 2026', read: '5 min read', copy: 'Practical safety questions for residents evaluating building access, visitor arrangements, emergency exits and support contacts.', primaryKeywords: ['PG safety checklist Bengaluru', 'PG security questions'], secondaryKeywords: ['paying guest safety', 'PG visitor rules', 'PG emergency contact', 'hostel safety checklist', 'PG building access', 'PG fire exit check', 'safe PG for students'], sections: [{ heading: 'Review entry and support', content: 'Ask how residents enter the building, what to do if a key or access card is lost, and who is reachable outside routine hours. Check that the main entrance and the route to your room feel suitable for your schedule. Understand how visitors are registered and what privacy rules apply.' }, { heading: 'Look at the building itself', content: 'During a visit, note stairs and exits, corridor lighting, door locks and any posted emergency information. Ask where to report a hazard or a broken lock. If you have a specific safety concern, raise it directly with the operator and assess the answer rather than relying on a badge or promotional claim.' }, { heading: 'Keep a personal plan', content: 'Save the property contact, a trusted person and local emergency numbers. Share your move-in address with someone you trust. Read all access and visitor rules before accepting them, and report urgent risks through the appropriate local channels.' }] },
+  { id: 'pg-near-college-bengaluru', tag: '#tenant-tips', title: 'Finding a PG Near Your Bengaluru College: A Student Guide', date: 'Updated 2026', read: '5 min read', copy: 'Search around the real campus entrance, check your class-day commute and compare the practical details that shape student life.', primaryKeywords: ['PG near college Bengaluru', 'student PG accommodation Bengaluru'], secondaryKeywords: ['PG near PES University', 'PG near RVCE', 'PG near Christ University Bengaluru', 'PG near BMSCE', 'student accommodation Bangalore', 'college commute Bengaluru', 'PG near campus'], sections: [{ heading: 'Use the correct campus as your anchor', content: 'Large institutions can have multiple gates, campuses or departments. Confirm which entrance you will use most often, then compare the full route from each PG address. Search by both the institution name and its neighbourhood, but verify the exact street and route before arranging a visit.' }, { heading: 'Match the stay to your timetable', content: 'Consider early classes, evening labs, study routines and weekend travel. Check transport availability at the times you expect to travel, plus nearby food and daily essentials. Ask about Wi-Fi access and shared-space routines if you plan to study at the property.' }, { heading: 'Visit and verify the terms', content: 'Inspect the room, facilities and access arrangements in person. Ask who handles repairs and how visitors or quiet hours work. Get all agreed stay terms in writing and keep a copy; student status should never pressure you into skipping basic checks.' }] },
+  { id: 'pg-near-office-bengaluru', tag: '#tenant-tips', title: 'Choosing a PG Near Your Bengaluru Office Without Guesswork', date: 'Updated 2026', read: '5 min read', copy: 'Use the office entrance, work schedule and actual travel route to assess a PG location before you shortlist it.', primaryKeywords: ['PG near office Bengaluru', 'working professionals PG Bengaluru'], secondaryKeywords: ['Bengaluru office commute', 'PG near HSR Layout offices', 'PG near Whitefield IT parks', 'PG near Electronic City', 'working women PG Bengaluru', 'weekday commute planning', 'Bengaluru rental search'], sections: [{ heading: 'Measure the weekday journey', content: 'Check the route from the exact property address to the office entrance at the times you commute. Account for walking, waiting and the last mile, and consider your return journey as well. If you use a company shuttle or a regular transit stop, verify the walk between that point and the property.' }, { heading: 'Check how the property fits work', content: 'Ask about Wi-Fi availability in your room, quiet hours, shared-space expectations and how maintenance is handled. Visit at a time when you can see the approach to the building. A good commute is important, but so are reliable everyday arrangements.' }, { heading: 'Compare only confirmed details', content: 'Do not infer facilities, rates or room arrangements from a neighbourhood or a different property. Ask the operator to confirm any decision-critical details in writing. Use map links to inspect the location, then make an in-person visit before committing.' }] },
+  { id: 'pg-listing-verification-explained', tag: '#staykolo-updates', title: 'What a Verified PG Listing Means on StayKolo', date: 'Updated 2026', read: '4 min read', copy: 'Understand the difference between a StayKolo-verified profile and an unverified local directory entry, and what each one does and does not promise.', primaryKeywords: ['verified PG listing Bengaluru', 'StayKolo PG verification'], secondaryKeywords: ['verified paying guest accommodation', 'PG directory Bengaluru', 'how PG verification works', 'unverified PG listing', 'PG listing information', 'property profile verification'], sections: [{ heading: 'Read the listing status carefully', content: 'A directory entry is a starting point for locating a property, not an endorsement. StayKolo uses a distinct verification label for a profile that has gone through its verification process. Do not treat an unverified directory result as checked simply because it appears in search.' }, { heading: 'Verification is not a substitute for your visit', content: 'A label cannot decide whether a stay suits your needs or guarantee a future experience. Confirm the address, facilities, contacts and written terms yourself. Ask questions and inspect the premises before sending money or making a decision.' }, { heading: 'How to request a review', content: 'Property operators can use the verification form to share the property name, contact information and a map link. The operations team can then follow up for the information needed to review the profile. A request is not the same as completed verification.' }] },
+  { id: 'pg-operator-listing-guide', tag: '#owner-guides', title: 'A Clear PG Listing Guide for Bengaluru Property Operators', date: 'Updated 2026', read: '5 min read', copy: 'Help prospective residents understand a property by keeping its location, contact and confirmed facilities clear and up to date.', primaryKeywords: ['PG listing guide Bengaluru', 'list a PG online Bengaluru'], secondaryKeywords: ['PG property listing details', 'paying guest operator guide', 'PG verification request', 'accurate PG address', 'PG listing contact information', 'Bengaluru accommodation directory'], sections: [{ heading: 'Make the location easy to confirm', content: 'Provide the property’s complete address and a map link that points to the correct entrance or building. Use the name residents recognise and maintain a reachable contact channel. Precise location details reduce confusion for people arranging a visit.' }, { heading: 'Publish only confirmed information', content: 'Describe facilities that are currently available and explain any relevant access or usage conditions. Avoid guessing about rates, room configurations or availability; update details when they change. Clear, consistent information helps prospective residents ask focused questions.' }, { heading: 'Prepare for verification follow-up', content: 'Use the StayKolo contact form to request a review and include the requested business details. Keep supporting information accurate and respond to operations follow-up. Submitting a request does not itself create a verified badge; wait for confirmation before presenting a profile as verified.' }] },
 ];
 const tagOptions = ['#tenant-tips', '#owner-guides', '#staykolo-updates'];
 
 function Shell({ children }: { children: ReactNode }) {
-  return <div className="min-h-[100dvh] bg-[#fbfcfd]"><SiteNav />{children}<SiteFooter /></div>;
+  return <div className="sk-public-shell min-h-[100dvh] bg-[#f4f1e9] text-[#1b1d18]"><SiteNav />{children}<SiteFooter /></div>;
+}
+
+function matchVerifiedPgQuery(query: string): boolean {
+  const text = `${verifiedPg.name} ${verifiedPg.area} ${verifiedPg.address}`.toLowerCase();
+  const cleaned = query.toLowerCase()
+    .replace(/\b(pg'?s?|hostels?|stays?|rooms?|living|paying\s*guest)\b/gi, ' ')
+    .replace(/\b(near|in|at|around|close\s*to|by|for)\b/gi, ' ')
+    .replace(/[^a-z0-9\s]/gi, ' ')
+    .trim();
+  return !cleaned || cleaned.split(/\s+/).every((token) => text.includes(token));
 }
 
 function Money({ value }: { value: number }) {
@@ -44,113 +59,52 @@ function PropertyCardFull({
   isLiked?: boolean;
   onToggleLike?: () => void;
 }) {
-  const [show360, setShow360] = useState(false);
+  const isVerified = isStaykoloVerified(property.id);
 
   return (
     <article
-      className={`sk-card overflow-hidden transition-all duration-200 hover:-translate-y-0.5 ${
-        selected ? 'border-[#168aad] ring-2 ring-[#168aad]/15' : ''
+      className={`relative overflow-hidden rounded-[16px] border bg-[#f7f5ed] transition-all ${
+        selected ? 'border-[#829e39] ring-2 ring-[#d6f36a]/70' : 'border-[#dedbd0]'
       }`}
       data-testid={`card-search-property-${property.id}`}
     >
-      <div className="relative h-[160px] overflow-hidden bg-[#e6f2f2]">
-        <img
-          src={property.images[0]}
-          alt={`${property.name} property exterior`}
-          className="h-full w-full object-cover"
-        />
-        <span className="absolute left-3 top-3 rounded-full bg-[#e5f3f8]/95 px-2.5 py-1 text-[10px] font-bold text-[#17668c] shadow-sm">
-          {property.verification.status}
-        </span>
-        <span className="absolute bottom-3 left-3 rounded-full bg-white/95 px-2.5 py-1 text-[10px] font-bold text-[#176d73] shadow-sm">
-          {property.occupancy}
-        </span>
-        {/* 25% Offer Badge (#50) */}
-        <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-[#b55b25] px-2.5 py-1 text-[10px] font-bold text-white shadow-sm">
-          <Gift size={11} /> Verified PG Offer
-        </span>
-
-        {/* 360 Virtual Tour Button */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            setShow360(true);
-          }}
-          className="absolute bottom-3 right-12 inline-flex items-center gap-1 rounded-full bg-black/75 backdrop-blur-xs px-2.5 py-1 text-[10px] font-bold text-white shadow hover:bg-[#0878b0] transition-colors"
-          title="Open 360° Virtual Tour"
-        >
-          <Compass size={11} className="text-cyan-400" /> 360° Tour
-        </button>
-
-        {/* Like Button (#40) */}
-        {onToggleLike && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleLike();
-            }}
-            className="absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/95 text-[#647782] shadow transition-transform active:scale-90 hover:text-[#b55b25]"
-            title={isLiked ? 'Remove from saved' : 'Save to Liked PGs'}
-          >
-            <Heart size={15} className={isLiked ? 'fill-[#b55b25] text-[#b55b25]' : ''} />
-          </button>
-        )}
-      </div>
-
-      <Modal360
-        isOpen={show360}
-        onClose={() => setShow360(false)}
-        property={{
-          name: property.name,
-          address: property.address,
-          coordinates: property.coordinates,
-          contact: property.contact,
-        }}
-      />
-      <button
-        type="button"
-        className="block w-full text-left p-4"
-        onClick={onSelect}
-        data-testid={`button-select-property-${property.id}`}
-      >
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h3 className="sk-display text-[17px] font-bold text-[#18364a]">{property.name}</h3>
-            <p className="mt-1 flex items-center gap-1 text-[12px] text-[#70818b]">
-              <MapPin size={13} />
-              {property.area}
-            </p>
-            {property.college && (
-              <span className="mt-1.5 inline-flex items-center gap-1 text-[11px] font-medium text-[#0878b0] bg-[#edf7fa] px-2 py-0.5 rounded">
-                <GraduationCap size={12} /> Near {property.college}
-              </span>
-            )}
-          </div>
-          <div className="text-right text-[13px] font-bold text-[#18364a]">
-            <Money value={property.startingRent} />
-            <small className="block font-sans text-[10px] font-normal text-[#70818b]">starting / month</small>
-          </div>
-        </div>
-        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2 border-t border-[#edf1f3] pt-3 text-[11px] text-[#647782]">
-          <span>{property.roomTypes.join(' · ')}</span>
-          <span>{property.genderPolicy}</span>
-        </div>
-      </button>
-      <div className="flex items-center justify-between border-t border-[#edf1f3] px-4 py-3 bg-[#fafcfd]">
-        <Link
-          href={`/pg/${property.slug}`}
-          className="inline-flex items-center gap-1 text-[12px] font-bold text-[#0878b0]"
-          data-testid={`link-search-detail-${property.id}`}
-        >
-          View details &amp; verify amenities <ArrowRight size={13} />
-        </Link>
-        {property.contact?.phone && (
-          <span className="text-[11px] text-[#506875] font-semibold flex items-center gap-1">
-            <Phone size={12} className="text-[#168aad]" /> {property.contact.phone}
+      {isVerified && <ShieldCheck aria-hidden="true" className="absolute right-5 top-5 z-10 h-6 w-6 text-[#526b1b]" />}
+      <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+        <button type="button" className="min-w-0 flex-1 text-left" onClick={onSelect} data-testid={`button-select-property-${property.id}`}>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[9px] font-bold uppercase tracking-[.1em] ${isVerified ? 'bg-[#e9f2cd] text-[#526b1b]' : 'bg-[#e9e6dd] text-[#686a61]'}`}>
+            {isVerified ? <ShieldCheck size={11} /> : <MapPin size={11} />}
+            {isVerified ? 'Staykolo verified profile' : 'Not verified by Staykolo'}
           </span>
-        )}
+          <h3 className="sk-display mt-2 text-[16px] font-bold text-[#1b1d18]">{property.name}</h3>
+          <p className="mt-1 flex items-start gap-1.5 text-[11px] leading-5 text-[#686a61]">
+            <MapPin size={13} className="mt-0.5 shrink-0" />{isVerified ? `${property.area} · ` : ''}{property.address}
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {standardAmenities.map((amenity) => (
+              <span key={amenity} className="inline-flex items-center gap-1.5 rounded-full bg-[#eeebe2] px-2.5 py-1 text-[9px] font-semibold text-[#55574e]">
+                {amenity === 'Wi-Fi' ? <Wifi size={11} /> : amenity === 'Water' ? <Droplets size={11} /> : <Fan size={11} />}
+                {amenity}
+              </span>
+            ))}
+          </div>
+        </button>
+        <div className="flex shrink-0 flex-wrap items-center gap-2 border-t border-[#e5e1d7] pt-3 sm:border-0 sm:pt-0">
+          {isVerified && onToggleLike && (
+            <button
+              type="button"
+              onClick={onToggleLike}
+              className={`grid h-9 w-9 place-items-center rounded-full border border-[#dedbd0] transition hover:border-[#829e39] ${isLiked ? 'text-[#728f2c]' : 'text-[#686a61]'}`}
+              aria-label={isLiked ? 'Remove from comparison' : 'Add to comparison'}
+              title={isLiked ? 'Remove from comparison' : 'Add to comparison'}
+            >
+              <Heart size={15} className={isLiked ? 'fill-current' : ''} />
+            </button>
+          )}
+          {isVerified && <Link href={`/pg/${property.slug}`} className="inline-flex items-center gap-1 rounded-full bg-[#1b1d18] px-3.5 py-2.5 text-[10px] font-bold text-white hover:bg-[#3a3d32]" data-testid={`link-search-detail-${property.id}`}>Details <ArrowRight size={12} /></Link>}
+          <a href={property.contact.googleMaps} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full border border-[#d4d0c6] px-3.5 py-2.5 text-[10px] font-bold text-[#34362f] hover:border-[#1b1d18]">
+            <ExternalLink size={12} /> Google Maps
+          </a>
+        </div>
       </div>
     </article>
   );
@@ -292,16 +246,14 @@ export function SearchPage() {
   const [location] = useLocation();
   const searchParams = new URLSearchParams(location.split('?')[1] ?? '');
   const initialQuery = searchParams.get('q') || searchParams.get('area') || '';
+  const directoryOnly = searchParams.get('status') === 'directory';
   const [query, setQuery] = useState(initialQuery);
-  const [price, setPrice] = useState('any');
-  const [gender, setGender] = useState('any');
-  const [room, setRoom] = useState('any');
-  const [amenities, setAmenities] = useState<string[]>([]);
-  const [selected, setSelected] = useState(pgs[0]?.id || 'pg_001');
+  const [selected, setSelected] = useState(pgs[0]?.id || '');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [mobileTab, setMobileTab] = useState<'list' | 'map'>('list');
   const [visibleCount, setVisibleCount] = useState(20);
+  const [compareModal, setCompareModal] = useState(false);
 
   // Liked PGs state (Req #40)
   const [likedIds, setLikedIds] = useState<string[]>(() => {
@@ -311,11 +263,6 @@ export function SearchPage() {
       return ['pg_001'];
     }
   });
-  const [viewLikedOnly, setViewLikedOnly] = useState(false);
-  const [compareModal, setCompareModal] = useState(false);
-
-  // User auth state simulation
-  const [isLoggedIn] = useState(() => Boolean(localStorage.getItem('staykolo.mockUser')));
 
   useEffect(() => {
     const timer = window.setTimeout(() => setLoading(false), 200);
@@ -331,63 +278,42 @@ export function SearchPage() {
   };
 
   const filtered = useMemo(() => {
-    return pgs.filter((p) => {
-      if (viewLikedOnly && !likedIds.includes(p.id)) return false;
-      const queryMatch = matchPGQuery(p, query);
-      const priceMatch =
-        price === 'any' ||
-        (price === 'under-13'
-          ? p.startingRent < 13000
-          : price === '13-18'
-          ? p.startingRent >= 13000 && p.startingRent <= 18000
-          : p.startingRent > 18000);
-      const genderMatch = gender === 'any' || p.genderPolicy === gender;
-      const roomMatch = room === 'any' || p.roomTypes.some((r) => r.toLowerCase().includes(room));
-      const amenityMatch = amenities.every((a) => p.amenities.includes(a));
-      return queryMatch && priceMatch && genderMatch && roomMatch && amenityMatch;
-    });
-  }, [query, price, gender, room, amenities, viewLikedOnly, likedIds]);
+    return pgs.filter((property) => matchPGQuery(property, query));
+  }, [query]);
 
-  // Non-logged in users see first 5 PGs, logged in see paginated list
-  const displayedProperties = !isLoggedIn && !viewLikedOnly
-    ? filtered.slice(0, 5)
-    : filtered.slice(0, visibleCount);
+  const displayedProperties = filtered.slice(0, visibleCount);
+  const hasMorePaginated = visibleCount < filtered.length;
+  const aparnaMatches = !directoryOnly && matchVerifiedPgQuery(query);
+  const selectedProperty = displayedProperties.find((property) => property.id === selected) ?? displayedProperties[0];
+  const comparedProperties = pgs.filter((property) => isStaykoloVerified(property.id) && likedIds.includes(property.id)).slice(0, 3);
 
-  const hasMoreUnauthenticated = !isLoggedIn && !viewLikedOnly && filtered.length > 5;
-  const hasMorePaginated = (isLoggedIn || viewLikedOnly) && visibleCount < filtered.length;
+  const visiblePins = selectedProperty ? [{
+    id: selectedProperty.id,
+    name: selectedProperty.name,
+    lat: selectedProperty.coordinates.lat,
+    lng: selectedProperty.coordinates.lng,
+  }] : [];
 
-  const visiblePins = displayedProperties.map((p) => ({
-    id: p.id,
-    name: p.name,
-    lat: p.coordinates.lat,
-    lng: p.coordinates.lng,
-  }));
-
-  const comparedProperties = pgs.filter((p) => likedIds.includes(p.id)).slice(0, 3);
+  useEffect(() => {
+    if (!displayedProperties.some((property) => property.id === selected)) {
+      setSelected(displayedProperties[0]?.id ?? '');
+    }
+  }, [displayedProperties, selected]);
 
   return (
     <Shell>
       <main>
-        {/* Banner with verified PG savings and Bengaluru search */}
-        <section className="border-b border-[#dfe9ee] bg-[#edf7fa]">
+        <section className="border-b border-[#d8d6cc] bg-[#eeebe2]">
           <div className="sk-container py-10 sm:py-14">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 mb-1.5">
                   <KarnatakaFlag className="h-3.5 w-5" />
-                  <p className="sk-eyebrow">StayKolo PG Locator · 400+ Verified PGs in Bengaluru</p>
+                  <p className="sk-eyebrow">Bengaluru PG directory · One verified profile, local listings clearly separated</p>
                 </div>
-                <h1 className="sk-display mt-2 text-[32px] font-bold text-[#18364a] sm:text-[42px]">
+                <h1 className="sk-display mt-2 text-[32px] font-bold text-[#1b1d18] sm:text-[42px]">
                   Search Bengaluru by colleges, areas, or landmarks.
                 </h1>
-              </div>
-              <div className="rounded-xl border border-[#0878b0]/30 bg-white p-3 shadow-sm text-xs">
-                <span className="flex items-center gap-1.5 font-bold text-[#b55b25]">
-                  <Gift size={14} /> 25% Off on Verified PGs
-                </span>
-                <p className="text-[#647782] mt-0.5 max-w-[260px]">
-                  Available only when you connect with a StayKolo verified PG.
-                </p>
               </div>
             </div>
 
@@ -428,7 +354,7 @@ export function SearchPage() {
             </div>
 
             {/* Search Filters Bar */}
-            <div className="mt-6 sk-card grid gap-3 p-3 md:grid-cols-[1.3fr_1fr_1fr_auto]">
+            <div className="mt-6 sk-card grid gap-3 p-3 md:grid-cols-[1fr_auto]">
               <label className="sk-field">
                 <Search size={17} />
                 <span className="sr-only">Search by college, area, or landmark</span>
@@ -443,48 +369,11 @@ export function SearchPage() {
                   data-testid="input-search-area"
                 />
               </label>
-              <label className="sk-field">
-                <SlidersHorizontal size={16} />
-                <span className="sr-only">Budget</span>
-                <select
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  aria-label="Budget"
-                  data-testid="select-search-price"
-                >
-                  <option value="any">Any monthly rent</option>
-                  <option value="under-13">Under ₹13,000</option>
-                  <option value="13-18">₹13,000–₹18,000</option>
-                  <option value="over-18">Above ₹18,000</option>
-                </select>
-                <ChevronDown size={14} />
-              </label>
-              <label className="sk-field">
-                <MapPin size={16} />
-                <span className="sr-only">Gender preference</span>
-                <select
-                  value={gender}
-                  onChange={(e) => setGender(e.target.value)}
-                  aria-label="Gender preference"
-                  data-testid="select-search-gender"
-                >
-                  <option value="any">Any gender policy</option>
-                  <option value="Women only">Women only</option>
-                  <option value="Men only">Men only</option>
-                  <option value="Co-living">Co-living</option>
-                </select>
-                <ChevronDown size={14} />
-              </label>
               <button
                 type="button"
                 className="sk-button sk-button-primary"
                 onClick={() => {
                   setQuery('');
-                  setPrice('any');
-                  setGender('any');
-                  setRoom('any');
-                  setAmenities([]);
-                  setViewLikedOnly(false);
                   setVisibleCount(20);
                 }}
                 data-testid="button-clear-filters"
@@ -529,86 +418,16 @@ export function SearchPage() {
 
           <div className="grid gap-6 lg:grid-cols-[minmax(360px,0.86fr)_1.14fr]">
             <aside className={mobileTab === 'map' ? 'hidden lg:block' : 'block'}>
-              {/* Liked & Compare Header Bar */}
-              <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+              <div className="mb-5">
                 <div>
                   <p className="sk-eyebrow">Available profiles</p>
-                  <h2 className="sk-display mt-1 text-[23px] font-bold text-[#18364a]">
-                    {loading
+                  <h2 className="sk-display mt-1 text-[23px] font-bold text-[#1b1d18]">
+                    {directoryOnly
+                      ? `${filtered.length} local directory listings`
+                      : loading
                       ? 'Checking profiles'
-                      : viewLikedOnly
-                      ? `${filtered.length} Liked Properties`
-                      : `${filtered.length} properties found ${query ? `for "${query}"` : ''}`}
+                      : `${filtered.length + (aparnaMatches ? 1 : 0)} listings found ${query ? `for "${query}"` : ''}`}
                   </h2>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setViewLikedOnly(!viewLikedOnly)}
-                    className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-xs font-bold transition-colors ${
-                      viewLikedOnly
-                        ? 'border-[#b55b25] bg-[#fff5f0] text-[#b55b25]'
-                        : 'border-[#d8e3e7] bg-white text-[#506875] hover:bg-[#edf7fa]'
-                    }`}
-                  >
-                    <Heart size={14} className={viewLikedOnly ? 'fill-[#b55b25]' : ''} />
-                    <span>Liked ({likedIds.length})</span>
-                  </button>
-                  {likedIds.length >= 2 && (
-                    <button
-                      type="button"
-                      onClick={() => setCompareModal(true)}
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#0878b0] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#076899]"
-                    >
-                      <Scale size={14} /> Compare
-                    </button>
-                  )}
-                </div>
-              </div>
-
-              {/* Refine Search Box */}
-              <div className="mb-5 sk-card p-4">
-                <p className="mb-3 text-[11px] font-bold uppercase tracking-[.1em] text-[#81909a]">
-                  Refine the list
-                </p>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <label className="sk-field min-h-[42px]">
-                    <Home size={14} />
-                    <span className="sr-only">Room type</span>
-                    <select
-                      value={room}
-                      onChange={(e) => setRoom(e.target.value)}
-                      aria-label="Room type"
-                      data-testid="select-search-room"
-                    >
-                      <option value="any">Any room type</option>
-                      <option value="single">Single room</option>
-                      <option value="twin">Twin sharing</option>
-                      <option value="triple">Triple sharing</option>
-                      <option value="four">Four sharing</option>
-                    </select>
-                    <ChevronDown size={13} />
-                  </label>
-                  <div className="flex flex-wrap items-center gap-2">
-                    {['Wi-Fi', 'Meals', 'Laundry'].map((item) => (
-                      <label
-                        key={item}
-                        className="inline-flex cursor-pointer items-center gap-1.5 text-[11px] font-semibold text-[#506875]"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={amenities.includes(item)}
-                          onChange={(e) =>
-                            setAmenities((prev) =>
-                              e.target.checked ? [...prev, item] : prev.filter((x) => x !== item)
-                            )
-                          }
-                          data-testid={`checkbox-amenity-${item.toLowerCase().replace('-', '')}`}
-                        />
-                        {item}
-                      </label>
-                    ))}
-                  </div>
                 </div>
               </div>
 
@@ -616,10 +435,9 @@ export function SearchPage() {
               {loading ? (
                 <div className="space-y-4" aria-label="Loading properties">
                   {[1, 2, 3].map((item) => (
-                    <div key={item} className="sk-card h-[300px] p-4">
-                      <div className="sk-sheen h-[150px] rounded-lg" />
-                      <div className="sk-sheen mt-4 h-4 w-3/5 rounded" />
-                      <div className="sk-sheen mt-3 h-3 w-2/5 rounded" />
+                    <div key={item} className="sk-card h-[112px] p-4">
+                      <div className="sk-sheen h-4 w-3/5 rounded" />
+                      <div className="sk-sheen mt-3 h-3 w-4/5 rounded" />
                     </div>
                   ))}
                 </div>
@@ -642,7 +460,7 @@ export function SearchPage() {
                     Try again
                   </button>
                 </div>
-              ) : displayedProperties.length === 0 ? (
+              ) : displayedProperties.length === 0 && !aparnaMatches ? (
                 <div className="sk-card p-8 text-center">
                   <Search className="mx-auto text-[#6e8c97]" size={25} />
                   <h3 className="sk-display mt-3 text-[17px] font-bold text-[#18364a]">
@@ -656,11 +474,6 @@ export function SearchPage() {
                     className="sk-button sk-button-secondary mt-5"
                     onClick={() => {
                       setQuery('');
-                      setPrice('any');
-                      setGender('any');
-                      setRoom('any');
-                      setAmenities([]);
-                      setViewLikedOnly(false);
                       setVisibleCount(20);
                     }}
                   >
@@ -668,16 +481,52 @@ export function SearchPage() {
                   </button>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {displayedProperties.map((property) => (
-                    <PropertyCardFull
-                      key={property.id}
-                      property={property}
-                      selected={selected === property.id}
-                      onSelect={() => setSelected(property.id)}
-                      isLiked={likedIds.includes(property.id)}
-                      onToggleLike={() => toggleLike(property.id)}
-                    />
+                <div className="space-y-6">
+                  {aparnaMatches && (
+                    <section aria-label="Verified PG">
+                      <div className="mb-3">
+                        <h3 className="sk-display text-[17px] font-bold text-[#1b1d18]">Verified PG <span className="font-sans text-[12px] text-[#77796f]">(1)</span></h3>
+                        <p className="mt-1 text-[11px] text-[#77796f]">This is the only PG currently marked verified by StayKolo.</p>
+                      </div>
+                      <article className="relative overflow-hidden rounded-[18px] border border-[#b2c957] bg-[#d6f36a] p-5 shadow-sm">
+                        <ShieldCheck aria-hidden="true" className="pointer-events-none absolute -left-3 top-4 z-0 h-32 w-32 text-[#748a35]/20" strokeWidth={1.1} />
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#526b1b]/[.16] via-[#d6f36a]/[.07] to-transparent" aria-hidden="true" />
+                        <div className="relative z-10">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-[#1b1d18] px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-white"><ShieldCheck size={12} /> Verified by StayKolo</span>
+                          <h4 className="sk-display mt-3 text-[20px] font-bold text-[#1b1d18]">{verifiedPg.name}</h4>
+                          <p className="mt-1 text-[12px] leading-5 text-[#404432]">{verifiedPg.address}</p>
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            {standardAmenities.map((amenity) => <span key={amenity} className="rounded-full border border-[#526b1b]/20 bg-white/65 px-2.5 py-1 text-[10px] font-semibold text-[#313a1d]">{amenity}</span>)}
+                          </div>
+                          <div className="mt-4 flex flex-wrap gap-2">
+                            <Link href={`/pg/${verifiedPg.slug}`} className="inline-flex items-center gap-1 rounded-full bg-[#1b1d18] px-3.5 py-2 text-[10px] font-bold text-white">View details <ArrowRight size={12} /></Link>
+                            <a href={verifiedPg.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-full border border-[#1b1d18]/25 bg-white/65 px-3.5 py-2 text-[10px] font-bold text-[#1b1d18]">Google Maps <ExternalLink size={11} /></a>
+                          </div>
+                        </div>
+                      </article>
+                    </section>
+                  )}
+                  {[
+                    { title: 'Local directory', copy: 'These listings are not verified by StayKolo. Only name, address and map links are shown.', listings: displayedProperties, verified: false },
+                  ].map((group) => group.listings.length > 0 && (
+                    <section key={group.title} aria-label={group.title}>
+                      <div className="mb-3">
+                        <h3 className="sk-display text-[17px] font-bold text-[#1b1d18]">{group.title} <span className="font-sans text-[12px] text-[#77796f]">({group.listings.length})</span></h3>
+                        <p className="mt-1 text-[11px] leading-5 text-[#77796f]">{group.copy}</p>
+                      </div>
+                      <div className="space-y-3">
+                        {group.listings.map((property) => (
+                          <PropertyCardFull
+                            key={property.id}
+                            property={property}
+                            selected={selected === property.id}
+                            onSelect={() => setSelected(property.id)}
+                            isLiked={likedIds.includes(property.id)}
+                            onToggleLike={group.verified ? () => toggleLike(property.id) : undefined}
+                          />
+                        ))}
+                      </div>
+                    </section>
                   ))}
 
                   {/* Show More Properties (Pagination) */}
@@ -693,37 +542,23 @@ export function SearchPage() {
                     </div>
                   )}
 
-                  {/* 5-PG Search Limit Barrier for Guests (#1) */}
-                  {hasMoreUnauthenticated && (
-                    <div className="sk-card border-2 border-dashed border-[#0878b0]/40 bg-[#edf7fa] p-6 text-center">
-                      <ShieldCheck className="mx-auto text-[#0878b0]" size={30} />
-                      <h3 className="sk-display mt-3 text-lg font-bold text-[#18364a]">
-                        Viewing first 5 of {filtered.length} PGs
-                      </h3>
-                      <p className="mx-auto mt-2 max-w-sm text-xs text-[#506875]">
-                        Create a free StayKolo account using your phone number to unlock all {filtered.length} listings,
-                        side-by-side comparison, and 25% first-month discounts.
-                      </p>
-                      <div className="mt-4 flex justify-center gap-3">
-                        <Link href="/auth/signup" className="sk-button sk-button-primary text-xs">
-                          Create Account (Free)
-                        </Link>
-                        <Link href="/auth/login" className="sk-button sk-button-secondary text-xs">
-                          Sign In
-                        </Link>
-                      </div>
-                    </div>
-                  )}
                 </div>
               )}
             </aside>
 
             {/* Map View */}
-            <div className={`lg:sticky lg:top-5 lg:h-[calc(100dvh-120px)] ${mobileTab === 'list' ? 'hidden lg:block' : 'block'}`}>
+            <div className={`relative lg:sticky lg:top-[88px] lg:h-[calc(100dvh-160px)] ${mobileTab === 'list' ? 'hidden lg:block' : 'block'}`}>
+              {selectedProperty && mobileTab === 'map' && (
+                <div className="absolute left-3 right-3 top-3 z-20 rounded-xl border border-[#dedbd0] bg-[#f7f5ed]/95 p-3 shadow-lg lg:hidden" role="status">
+                  <p className="text-[12px] font-bold text-[#1b1d18]">{selectedProperty.name}</p>
+                  <p className="mt-0.5 text-[10px] text-[#686a61]">{selectedProperty.area}</p>
+                </div>
+              )}
               <MapView
                 pins={visiblePins}
                 selectedId={selected}
                 onSelect={setSelected}
+                center={selectedProperty ? [selectedProperty.coordinates.lng, selectedProperty.coordinates.lat] : undefined}
                 className="h-[520px] lg:h-full"
               />
             </div>
@@ -732,23 +567,23 @@ export function SearchPage() {
       </main>
 
       {/* Floating Sticky Compare Bar when 2+ PGs are selected (#43) */}
-      {likedIds.length >= 2 && !compareModal && (
+      {comparedProperties.length >= 2 && !compareModal && (
         <aside className="fixed bottom-5 inset-x-0 z-40 flex justify-center px-3 pointer-events-none" aria-label="Compare bar">
-          <div className="pointer-events-auto flex items-center justify-between sm:justify-start gap-3 sm:gap-4 rounded-2xl bg-[#18364a] px-4 py-2.5 sm:px-5 sm:py-3 text-white shadow-2xl border border-white/20 animate-in slide-in-from-bottom-5 max-w-lg w-full">
+          <div className="pointer-events-auto flex items-center justify-between sm:justify-start gap-3 sm:gap-4 rounded-2xl bg-[#1b1d18] px-4 py-2.5 sm:px-5 sm:py-3 text-white shadow-2xl border border-white/20 animate-in slide-in-from-bottom-5 max-w-lg w-full">
             <div className="flex items-center gap-2.5 min-w-0">
-              <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-[#168aad] text-xs font-bold text-white shadow-inner">
+              <span className="flex h-7 w-7 sm:h-8 sm:w-8 shrink-0 items-center justify-center rounded-full bg-[#829e39] text-xs font-bold text-white shadow-inner">
                 {likedIds.length}
               </span>
               <div className="text-left truncate">
                 <p className="text-xs font-bold leading-tight truncate">PGs to Compare</p>
-                <p className="text-[10px] text-white/70 hidden sm:block">Compare rent, amenities &amp; offers</p>
+                <p className="text-[10px] text-white/70 hidden sm:block">Compare verified PG details</p>
               </div>
             </div>
             <div className="flex items-center gap-2 shrink-0">
               <button
                 type="button"
                 onClick={() => setCompareModal(true)}
-                className="flex items-center gap-1.5 rounded-xl bg-[#0878b0] px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs font-bold text-white hover:bg-[#076899] shadow-md transition-transform active:scale-95"
+                className="flex items-center gap-1.5 rounded-xl bg-[#d6f36a] px-3.5 py-1.5 sm:px-4 sm:py-2 text-xs font-bold text-[#1b1d18] hover:bg-[#c8e65d] shadow-md transition-transform active:scale-95"
               >
                 <Scale size={13} /> Compare
               </button>
@@ -786,11 +621,6 @@ export function SearchPage() {
                   {comparedProperties.map((p) => (
                     <th key={p.id} className="p-3 font-bold text-[#18364a] min-w-[160px] sm:min-w-[190px]">
                       <div className="space-y-1.5">
-                        <img
-                          src={p.images[0]}
-                          alt={p.name}
-                          className="h-24 w-full rounded-lg object-cover"
-                        />
                         <span className="block font-bold text-sm text-[#18364a] line-clamp-1">{p.name}</span>
                         <span className="block text-[11px] font-normal text-[#70818b]">{p.area}</span>
                       </div>
@@ -918,26 +748,32 @@ export function SearchPage() {
 /* ========== PROPERTY DETAIL (Req #22, #50, #38, #35) ========== */
 export function PropertyDetail() {
   const { slug } = useParams<{ slug: string }>();
-  const property =
-    pgs.find((p) => p.slug === slug || p.id === slug) ||
-    (slug?.includes('koramangala') ? pgs.find((p) => p.slug.includes('koramangala')) : undefined) ||
-    pgs[0];
+  const property = pgs.find((p) => p.slug === slug || p.id === slug);
   const [modal, setModal] = useState(false);
-  const [mediaMode, setMediaMode] = useState<'photos' | '360'>('360');
 
-  // Amenities verification checklist rating by tenant/user (Req #22)
-  const [verifiedAmenities, setVerifiedAmenities] = useState<Record<string, boolean>>({
-    'Wi-Fi': true,
-    'Meals': true,
-    'Laundry': true,
-  });
-
-  const toggleVerification = (amenity: string) => {
-    setVerifiedAmenities((prev) => ({
-      ...prev,
-      [amenity]: !prev[amenity],
-    }));
-  };
+  if (slug === verifiedPg.slug) {
+    return (
+      <Shell>
+        <main className="sk-container min-h-[70vh] py-10">
+          <Link href="/search" className="inline-flex items-center gap-1 text-[12px] font-bold text-[#1b1d18]"><ArrowLeft size={14} /> Back to search</Link>
+          <article className="relative mt-7 max-w-[900px] overflow-hidden rounded-[22px] border border-[#b2c957] bg-[#d6f36a] p-6 sm:p-10">
+            <ShieldCheck aria-hidden="true" className="pointer-events-none absolute -left-8 -top-8 z-0 h-64 w-64 text-[#1b1d18]/[.07]" strokeWidth={1.1} />
+            <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#526b1b]/[.12] via-[#d6f36a]/[.08] to-transparent" aria-hidden="true" />
+            <div className="relative z-10">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1b1d18] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.1em] text-white"><ShieldCheck size={13} /> StayKolo verified</span>
+              <h1 className="sk-display mt-5 text-[34px] font-bold leading-tight tracking-[-.04em] text-[#1b1d18] sm:text-[44px]">{verifiedPg.name}</h1>
+              <p className="mt-3 flex items-start gap-2 text-[14px] leading-6 text-[#404432]"><MapPin size={16} className="mt-1 shrink-0" />{verifiedPg.address}</p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {standardAmenities.map((amenity) => <span key={amenity} className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-3 py-2 text-[11px] font-semibold text-[#303328]">{amenity === 'Wi-Fi' ? <Wifi size={13} /> : amenity === 'Water' ? <Droplets size={13} /> : <Fan size={13} />}{amenity}</span>)}
+              </div>
+              <p className="mt-6 max-w-[580px] text-[13px] leading-6 text-[#4d523b]">View this location in Google Maps. Contact details and room or rate information are not currently listed.</p>
+              <a href={verifiedPg.googleMapsUrl} target="_blank" rel="noopener noreferrer" className="mt-5 inline-flex items-center gap-2 rounded-full bg-[#1b1d18] px-5 py-3 text-[12px] font-bold text-white">Open in Google Maps <ExternalLink size={14} /></a>
+            </div>
+          </article>
+        </main>
+      </Shell>
+    );
+  }
 
   if (!property) {
     return (
@@ -957,6 +793,46 @@ export function PropertyDetail() {
     );
   }
 
+  if (!isStaykoloVerified(property.id)) {
+    return (
+      <Shell>
+        <main className="sk-container min-h-[70vh] py-10">
+          <Link href="/search?status=directory" className="inline-flex items-center gap-1 text-[12px] font-bold text-[#1b1d18]">
+            <ArrowLeft size={14} /> Back to directory
+          </Link>
+          <section className="mt-7 max-w-[900px] overflow-hidden rounded-[22px] border border-[#dedbd0] bg-[#f7f5ed]">
+            <div className="p-6 sm:p-9">
+              <p className="inline-flex items-center gap-1.5 rounded-full bg-[#e9e6dd] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.1em] text-[#686a61]">
+                <MapPin size={12} /> Not verified by Staykolo
+              </p>
+              <h1 className="sk-display mt-5 text-[32px] font-bold leading-tight tracking-[-.04em] text-[#1b1d18] sm:text-[42px]">{property.name}</h1>
+              <p className="mt-3 flex items-start gap-2 text-[13px] leading-6 text-[#686a61]">
+                <MapPin size={16} className="mt-1 shrink-0" /> {property.address}
+              </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {standardAmenities.map((amenity) => <span key={amenity} className="inline-flex items-center gap-1.5 rounded-full border border-[#dedbd0] bg-white px-3 py-2 text-[11px] font-semibold text-[#55574e]">{amenity === 'Wi-Fi' ? <Wifi size={13} /> : amenity === 'Water' ? <Droplets size={13} /> : <Fan size={13} />}{amenity}</span>)}
+              </div>
+              <div className="mt-6 flex flex-wrap gap-3">
+                <a href={property.contact.googleMaps} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full bg-[#1b1d18] px-5 py-3 text-[12px] font-bold text-white hover:bg-[#3a3d32]">
+                  Open in Google Maps <ExternalLink size={14} />
+                </a>
+                <Link href="/search?status=directory" className="inline-flex items-center gap-2 rounded-full border border-[#d4d0c6] px-5 py-3 text-[12px] font-bold text-[#34362f] hover:border-[#1b1d18]">
+                  Back to directory
+                </Link>
+              </div>
+            </div>
+            <MapView
+              pins={[{ id: property.id, name: property.name, lat: property.coordinates.lat, lng: property.coordinates.lng }]}
+              selectedId={property.id}
+              center={[property.coordinates.lng, property.coordinates.lat]}
+              className="h-[350px] rounded-none border-0 border-t border-[#dedbd0]"
+            />
+          </section>
+        </main>
+      </Shell>
+    );
+  }
+
   return (
     <Shell>
       <main>
@@ -968,87 +844,13 @@ export function PropertyDetail() {
             <ArrowLeft size={14} /> Back to search
           </Link>
 
-          {/* Media View Mode Switcher */}
-          <div className="mt-4 flex items-center justify-between">
-            <div className="flex items-center gap-1 rounded-xl bg-[#edf7fa] p-1 border border-[#d9ebf0]">
-              <button
-                type="button"
-                onClick={() => setMediaMode('photos')}
-                className={`rounded-lg px-3 py-1.5 text-xs font-bold transition-all ${
-                  mediaMode === 'photos'
-                    ? 'bg-white text-[#0878b0] shadow-xs'
-                    : 'text-[#506875] hover:text-[#18364a]'
-                }`}
-              >
-                📷 Photo Gallery
-              </button>
-              <button
-                type="button"
-                onClick={() => setMediaMode('360')}
-                className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-xs font-bold transition-all ${
-                  mediaMode === '360'
-                    ? 'bg-[#0878b0] text-white shadow-xs'
-                    : 'text-[#0878b0] hover:bg-white/60'
-                }`}
-              >
-                <Compass size={13} className="animate-spin-slow" /> 🌐 360° Virtual Tour
-              </button>
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 rounded-[18px] border border-[#dedbd0] bg-[#eeebe2] px-5 py-4">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-[.13em] text-[#728f2c]">Verified property profile</p>
+              <p className="mt-1 text-[12px] text-[#686a61]">Property details, room options and location in one clear place.</p>
             </div>
-
-            <button
-              type="button"
-              onClick={() => setMediaMode(mediaMode === '360' ? 'photos' : '360')}
-              className="text-xs font-bold text-[#0878b0] hover:underline flex items-center gap-1"
-            >
-              {mediaMode === '360' ? 'Switch to Photos →' : 'Launch 360° Panorama →'}
-            </button>
+            <ShieldCheck size={21} className="text-[#728f2c]" />
           </div>
-
-          {/* 360 Virtual Tour View or Photos Showcase */}
-          {mediaMode === '360' ? (
-            <div className="mt-3">
-              <Interactive360View
-                lat={property.coordinates?.lat}
-                lng={property.coordinates?.lng}
-                name={property.name}
-                address={property.address}
-                googleMapsUrl={property.contact?.googleMaps}
-                height="h-[500px] sm:h-[580px]"
-              />
-            </div>
-          ) : (
-            <div className="mt-3 grid gap-2 sm:grid-cols-[1.6fr_1fr]">
-              <div className="relative overflow-hidden rounded-[14px]">
-                <img
-                  src={property.images[0]}
-                  alt={`${property.name} exterior`}
-                  className="h-[260px] w-full object-cover sm:h-[390px]"
-                />
-                <button
-                  type="button"
-                  onClick={() => setMediaMode('360')}
-                  className="absolute bottom-3 left-3 inline-flex items-center gap-1.5 rounded-full bg-black/80 backdrop-blur-xs px-3.5 py-1.5 text-xs font-bold text-white shadow hover:bg-[#0878b0] transition-colors"
-                >
-                  <Compass size={14} className="text-cyan-400" /> Enter 360° Virtual Tour
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-1">
-                <img
-                  src={property.images[1]}
-                  alt={`${property.name} common area`}
-                  className="h-[127px] w-full rounded-[14px] object-cover sm:h-[191px]"
-                />
-                <div className="sk-surface-blue flex flex-col justify-end rounded-[14px] p-5">
-                  <span className="flex items-center gap-1.5 font-bold text-xs text-[#176d73]">
-                    <Gift size={15} /> 25% Off 1st Month Rent
-                  </span>
-                  <p className="text-[11px] font-medium leading-4 text-[#476772] mt-1">
-                    Exclusive StayKolo Verified Badge discount applied when contacting through our platform.
-                  </p>
-                </div>
-              </div>
-            </div>
-          )}
 
           <div className="grid gap-10 py-9 lg:grid-cols-[1.15fr_.85fr]">
             <div>
@@ -1113,41 +915,10 @@ export function PropertyDetail() {
                 </div>
               </div>
 
-              {/* Amenities & Tenant Checklist Rating (Req #21, #22) */}
               <div className="mt-9">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="sk-eyebrow">Amenities checklist</p>
-                    <h2 className="sk-display text-lg font-bold text-[#18364a]">
-                      Resident-Verified Amenities
-                    </h2>
-                  </div>
-                  <span className="text-[11px] text-[#81909a]">Check to verify on-site</span>
-                </div>
-                <p className="text-xs text-[#6d7e88] mt-1">
-                  Users and tenants verify which advertised amenities are operational at this location:
-                </p>
-                <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                  {property.amenities.map((item) => {
-                    const isChecked = verifiedAmenities[item] ?? true;
-                    return (
-                      <label
-                        key={item}
-                        className={`flex items-center gap-2 rounded-lg border p-3 cursor-pointer transition-colors ${
-                          isChecked ? 'border-[#168aad] bg-[#edf7fa]' : 'border-[#dfe9ed] bg-white'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={() => toggleVerification(item)}
-                          className="h-4 w-4 accent-[#0878b0]"
-                        />
-                        <span className="text-xs font-semibold text-[#355364]">{item}</span>
-                        {isChecked && <span className="ml-auto text-[10px] font-bold text-[#176d73]">Verified ✓</span>}
-                      </label>
-                    );
-                  })}
+                <p className="sk-eyebrow">Amenities</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {standardAmenities.map((amenity) => <span key={amenity} className="inline-flex items-center gap-1.5 rounded-full border border-[#dedbd0] bg-white px-3 py-2 text-[11px] font-semibold text-[#55574e]">{amenity === 'Wi-Fi' ? <Wifi size={13} /> : amenity === 'Water' ? <Droplets size={13} /> : <Fan size={13} />}{amenity}</span>)}
                 </div>
               </div>
 
@@ -1336,15 +1107,15 @@ function AuthLayout({
               <KarnatakaFlag className="h-4 w-6" />
               <p className="sk-eyebrow">{eyebrow}</p>
             </div>
-            <h1 className="sk-display text-3xl sm:text-4xl font-bold text-[#18364a] leading-tight">
+            <h1 className="sk-display text-3xl sm:text-4xl font-bold text-[#1b1d18] leading-tight">
               {title}
             </h1>
-            <p className="text-sm leading-relaxed text-[#5f7783] max-w-md">
+            <p className="text-sm leading-relaxed text-[#686a61] max-w-md">
               {copy}
             </p>
-            <div className="rounded-xl border border-[#dfe9ee] bg-[#f8fafb] p-4 text-xs space-y-2 text-[#506875]">
-              <div className="flex items-center gap-2 font-bold text-[#18364a]">
-                <ShieldCheck size={16} className="text-[#0878b0]" />
+            <div className="rounded-xl border border-[#dedbd0] bg-[#eeebe2] p-4 text-xs space-y-2 text-[#55574e]">
+              <div className="flex items-center gap-2 font-bold text-[#1b1d18]">
+                <ShieldCheck size={16} className="text-[#728f2c]" />
                 Universal 10-Digit Mobile UID Login
               </div>
               <p>
@@ -1352,7 +1123,7 @@ function AuthLayout({
               </p>
             </div>
           </div>
-          <div className="sk-card p-6 sm:p-8 shadow-lg border border-[#d8e4e9] bg-white">
+          <div className="sk-card p-6 sm:p-8 shadow-lg border border-[#dedbd0] bg-[#f7f5ed]">
             {children}
           </div>
         </div>
@@ -1362,126 +1133,137 @@ function AuthLayout({
 }
 
 /* ========== UNIFIED LOGIN PAGE ========== */
+type WebsiteProfile = { name: string; contact: string; email?: string; photo?: string };
+
+function readWebsiteProfile(): WebsiteProfile | null {
+  try {
+    const stored = localStorage.getItem('staykolo.websiteProfile');
+    if (!stored) return null;
+    const value: unknown = JSON.parse(stored);
+    if (typeof value !== 'object' || value === null) return null;
+    const profile = value as Record<string, unknown>;
+    return typeof profile.name === 'string' && typeof profile.contact === 'string'
+      ? { name: profile.name, contact: profile.contact, email: typeof profile.email === 'string' ? profile.email : undefined, photo: typeof profile.photo === 'string' ? profile.photo : undefined }
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveWebsiteProfile(profile: WebsiteProfile) {
+  localStorage.setItem('staykolo.websiteProfile', JSON.stringify(profile));
+  window.dispatchEvent(new Event('staykolo:profile-updated'));
+}
+
 export function LoginPage() {
-  const [, setLocation] = useLocation();
+  const [location, setLocation] = useLocation();
+  const isSignUp = location.startsWith('/auth/signup') || location.startsWith('/auth/register');
+  const [name, setName] = useState('');
   const [contact, setContact] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [state, setState] = useState<'idle' | 'loading'>('idle');
   const [error, setError] = useState('');
-  const [ownerPendingMessage, setOwnerPendingMessage] = useState(false);
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    if (!contact || !password) {
-      setError('Enter your phone number and password.');
+    if ((isSignUp && !name.trim()) || !contact.trim() || !password) {
+      setError(isSignUp ? 'Enter your name, phone number and password.' : 'Enter your phone number and password.');
+      return;
+    }
+    if (isSignUp && !contact.match(/(@|[0-9]{10})/)) {
+      setError('Enter a valid 10-digit phone number or email address.');
       return;
     }
 
     setError('');
     setState('loading');
-
-    setTimeout(() => {
-      // Automatic role detection from stored user or credentials
-      const savedUserStr = localStorage.getItem('staykolo.mockUser');
-      let role = 'tenant';
-      if (savedUserStr) {
-        try {
-          const parsed = JSON.parse(savedUserStr);
-          if (parsed.contact === contact && parsed.role) {
-            role = parsed.role;
-          }
-        } catch (_) {}
-      }
-
-      // Quick-test keyword or demo phone number handling
-      const lower = contact.toLowerCase();
-      if (lower.includes('superadmin') || contact === '9999999999') role = 'superadmin';
-      else if (lower.includes('admin') || lower.includes('owner') || contact === '8888888888') role = 'admin';
-      else if (lower.includes('staff') || contact === '7777777777') role = 'staff';
-
-      if (role === 'admin') {
-        if (contact.includes('new') || contact.includes('pending')) {
-          setOwnerPendingMessage(true);
-          setState('idle');
-        } else {
-          setLocation('/admin/overview');
-        }
-      } else if (role === 'staff') {
-        setLocation('/staff/overview');
-      } else if (role === 'superadmin') {
-        setLocation('/superadmin/overview');
-      } else {
-        setLocation('/tenant/home');
-      }
-    }, 500);
+    const existing = readWebsiteProfile();
+    const profileName = isSignUp ? name.trim() : existing?.contact === contact ? existing.name : contact.split('@')[0];
+    try {
+      saveWebsiteProfile({ name: profileName, contact: contact.trim(), email: email.trim() || (existing?.contact === contact ? existing.email : undefined), photo: existing?.contact === contact ? existing.photo : undefined });
+      setLocation('/profile');
+    } catch {
+      setError('Your profile could not be saved in this browser. Please try again.');
+      setState('idle');
+    }
   };
 
   return (
     <AuthLayout
-      eyebrow="StayKolo Access"
-      title="Welcome Back."
-      copy="Log in to manage your stays, view shortlisted PGs, check booking statuses, and access your StayKolo services."
+      eyebrow="StayKolo Profile"
+      title={isSignUp ? 'Create your StayKolo profile.' : 'Welcome back.'}
+      copy="Your website sign-in is for your StayKolo discovery profile. Property owner, staff and platform dashboards use their own separate access points."
     >
-      <p className="sk-eyebrow">StayKolo Account</p>
-      <h2 className="sk-display mt-2 text-[26px] font-bold text-[#18364a]">Sign in to your account</h2>
-      <p className="text-xs text-[#506875] mt-1">Enter your registered phone number and password.</p>
-
-      {ownerPendingMessage ? (
-        <div className="mt-6 rounded-xl bg-[#edf7fa] p-5 text-center">
-          <Info className="mx-auto text-[#0878b0]" size={28} />
-          <h3 className="sk-display mt-3 text-lg font-bold text-[#18364a]">Verification In Progress</h3>
-          <p className="text-xs text-[#506875] mt-2 leading-relaxed">
-            Our team will contact you soon to complete profile creation and business verification.
-          </p>
-          <button
-            type="button"
-            className="sk-button sk-button-primary mt-4 text-xs"
-            onClick={() => setOwnerPendingMessage(false)}
-          >
-            Back to Sign In
-          </button>
-        </div>
-      ) : (
-        <form onSubmit={submit} className="mt-5 space-y-4" noValidate>
-          <Field
-            label="Phone Number (UID)"
-            name="login-contact"
-            value={contact}
-            onChange={setContact}
-            placeholder="e.g. 9845012345"
-          />
-          <Field
-            label="Password"
-            name="login-password"
-            value={password}
-            onChange={setPassword}
-            type="password"
-            placeholder="Enter password"
-          />
-
-          {error && <p className="text-xs text-[#b55b25]">{error}</p>}
-
-          <button
-            type="submit"
-            disabled={state === 'loading'}
-            className="sk-button sk-button-primary w-full disabled:opacity-50"
-            data-testid="button-login-submit"
-          >
-            {state === 'loading' ? 'Authenticating…' : 'Sign In'} <ArrowRight size={15} />
-          </button>
-
-          <div className="flex justify-between items-center text-xs pt-2">
-            <Link href="/auth/forgot-password" className="sk-link">
-              Forgot password?
-            </Link>
-            <Link href="/auth/signup" className="sk-link">
-              Create new account
-            </Link>
-          </div>
-        </form>
-      )}
+      <div className="flex gap-2 rounded-xl bg-[#eeebe2] p-1">
+        <Link href="/auth/login" className={`flex-1 rounded-lg py-2 text-center text-xs font-bold ${!isSignUp ? 'bg-[#1b1d18] text-[#d6f36a]' : 'text-[#686a61]'}`}>Sign in</Link>
+        <Link href="/auth/signup" className={`flex-1 rounded-lg py-2 text-center text-xs font-bold ${isSignUp ? 'bg-[#1b1d18] text-[#d6f36a]' : 'text-[#686a61]'}`}>Create profile</Link>
+      </div>
+      <h2 className="sk-display mt-5 text-[26px] font-bold text-[#1b1d18]">{isSignUp ? 'Create your profile' : 'Sign in to your profile'}</h2>
+      <p className="mt-1 text-xs text-[#686a61]">{isSignUp ? 'Set up one profile for your StayKolo website activity.' : 'Continue to your StayKolo website profile.'}</p>
+      <form onSubmit={submit} className="mt-5 space-y-4" noValidate>
+        {isSignUp && <Field label="Full name" name="signup-name" value={name} onChange={setName} placeholder="Your name" />}
+        <Field label="Phone number or email" name="account-contact" value={contact} onChange={setContact} placeholder="Phone number or email address" />
+        {isSignUp && <Field label="Email address (optional)" name="signup-email" value={email} onChange={setEmail} placeholder="you@example.com" />}
+        <Field label="Password" name="account-password" value={password} onChange={setPassword} type="password" placeholder="Enter password" />
+        {error && <p className="text-xs text-[#b55b25]" role="alert">{error}</p>}
+        <button type="submit" disabled={state === 'loading'} className="sk-button sk-button-primary w-full disabled:opacity-50" data-testid="button-login-submit">
+          {state === 'loading' ? 'Opening your profile…' : isSignUp ? 'Create profile' : 'Sign in'} <ArrowRight size={15} />
+        </button>
+        {!isSignUp && <Link href="/auth/forgot-password" className="block pt-1 text-right text-xs text-[#526b1b]">Forgot password?</Link>}
+      </form>
     </AuthLayout>
   );
+}
+
+export function WebsiteProfilePage() {
+  const [, setLocation] = useLocation();
+  const [savedProfile, setSavedProfile] = useState<WebsiteProfile | null>(() => readWebsiteProfile());
+  const [name, setName] = useState(savedProfile?.name ?? '');
+  const [contact, setContact] = useState(savedProfile?.contact ?? '');
+  const [email, setEmail] = useState(savedProfile?.email ?? '');
+  const [photo, setPhoto] = useState(savedProfile?.photo ?? '');
+  const [message, setMessage] = useState('');
+
+  if (!savedProfile) {
+    return <Shell><main className="sk-container py-16"><div className="mx-auto max-w-md rounded-2xl border border-[#dedbd0] bg-[#f7f5ed] p-7 text-center"><h1 className="sk-display text-2xl font-bold text-[#1b1d18]">Your StayKolo profile</h1><p className="mt-2 text-sm text-[#686a61]">Sign in to view and update your website profile.</p><Link href="/auth/login" className="sk-button sk-button-primary mt-5">Sign in / Sign up</Link></div></main></Shell>;
+  }
+
+  const save = (event: FormEvent) => {
+    event.preventDefault();
+    if (!name.trim() || !contact.trim()) {
+      setMessage('Name and phone number or email are required.');
+      return;
+    }
+    const next = { name: name.trim(), contact: contact.trim(), email: email.trim() || undefined, photo: photo || undefined };
+    try {
+      saveWebsiteProfile(next);
+      setSavedProfile(next);
+      setMessage('Profile saved in this browser.');
+    } catch {
+      setMessage('Your profile could not be saved in this browser. Please try again.');
+    }
+  };
+
+  return <Shell><main className="sk-container py-10 sm:py-14"><div className="mx-auto max-w-2xl"><p className="sk-eyebrow">Website account</p><h1 className="sk-display mt-2 text-3xl font-bold text-[#1b1d18]">My profile</h1><p className="mt-2 text-sm text-[#686a61]">Manage the details attached to your StayKolo website profile.</p>
+    <form onSubmit={save} className="mt-7 space-y-5 rounded-2xl border border-[#dedbd0] bg-[#f7f5ed] p-5 sm:p-7">
+      <div className="flex items-center gap-4">{photo ? <img src={photo} alt="Profile" className="h-16 w-16 rounded-full object-cover" /> : <span className="grid h-16 w-16 place-items-center rounded-full bg-[#d6f36a] text-2xl font-bold text-[#1b1d18]">{name.trim().charAt(0) || 'U'}</span>}<label className="text-xs font-semibold text-[#42443c]">Profile photo<input type="file" accept="image/*" className="mt-2 block w-full text-xs" onChange={(event) => {
+        const file = event.currentTarget.files?.[0];
+        if (!file) return;
+        if (file.size > 2 * 1024 * 1024) { setMessage('Choose an image smaller than 2 MB.'); return; }
+        const reader = new FileReader();
+        reader.onload = () => { if (typeof reader.result === 'string') { setPhoto(reader.result); setMessage(''); } };
+        reader.onerror = () => setMessage('The selected image could not be read.');
+        reader.readAsDataURL(file);
+      }} /></label></div>
+      <Field label="Full name" name="profile-name" value={name} onChange={setName} placeholder="Your name" />
+      <Field label="Phone number or email" name="profile-contact" value={contact} onChange={setContact} placeholder="Phone number or email" />
+      <Field label="Email address" name="profile-email" value={email} onChange={setEmail} placeholder="you@example.com" />
+      {message && <p className="text-xs text-[#526b1b]" role="status">{message}</p>}
+      <div className="flex flex-wrap gap-3"><button type="submit" className="sk-button sk-button-primary">Save profile</button><button type="button" className="sk-button sk-button-secondary" onClick={() => { localStorage.removeItem('staykolo.websiteProfile'); window.dispatchEvent(new Event('staykolo:profile-updated')); setSavedProfile(null); setLocation('/'); }}>Sign out</button></div>
+    </form>
+    <Link href="/legal/data-deletion" className="mt-5 inline-block text-xs font-semibold text-[#526b1b] underline underline-offset-4">Request profile deletion</Link>
+  </div></main></Shell>;
 }
 
 /* ========== UNIFIED SIGNUP PAGE ========== */
@@ -1758,16 +1540,43 @@ export function ResetPasswordPage() {
   );
 }
 
-function ChronicleCard({ item }: { item: typeof chronicles[number] }) {
-  return <article className="sk-card p-5"><div className="flex items-center justify-between gap-3"><span className="text-[11px] font-bold text-[#0878b0]">{item.tag}</span><span className="text-[11px] text-[#81909a]">{item.read}</span></div><h2 className="sk-display mt-5 text-[20px] font-bold leading-tight text-[#18364a]">{item.title}</h2><p className="mt-3 text-[13px] leading-6 text-[#6d7e88]">{item.copy}</p><p className="mt-5 text-[11px] font-semibold text-[#81909a]">{item.date}</p></article>;
+function BlogCard({ item }: { item: typeof chronicles[number] }) {
+  return <article className="sk-card p-5 transition hover:border-[#829e39]"><div className="flex items-center justify-between gap-3"><span className="text-[11px] font-bold text-[#728f2c]">{item.tag.replace('#', '')}</span><span className="text-[11px] text-[#77796f]">{item.read}</span></div><h2 className="sk-display mt-5 text-[20px] font-bold leading-tight text-[#1b1d18]">{item.title}</h2><p className="mt-3 text-[13px] leading-6 text-[#686a61]">{item.copy}</p><p className="mt-5 text-[11px] font-semibold text-[#77796f]">{item.date}</p><Link href={`/blogs/article/${item.id}`} className="mt-5 inline-flex items-center gap-1 text-[12px] font-bold text-[#526b1b]">Read article <ArrowRight size={13} /></Link></article>;
 }
-export function ChroniclesPage() {
+export function BlogsPage() {
   const [active, setActive] = useState('all'); const list = active === 'all' ? chronicles : chronicles.filter((item) => item.tag === active);
-  return <Shell><main><section className="border-b border-[#dfe9ee] bg-[#edf7fa]"><div className="sk-container py-14 sm:py-20"><p className="sk-eyebrow">Chronicles</p><h1 className="sk-display mt-3 text-[42px] font-bold text-[#18364a] sm:text-[56px]">Useful notes for the Bengaluru move.</h1><p className="mt-4 max-w-[590px] text-[16px] leading-7 text-[#59717e]">Specific guidance for residents, practical notes for property teams and a record of how Staykolo is being built.</p></div></section><section className="sk-container py-12"><div className="flex flex-wrap gap-2" aria-label="Chronicle tags"><button type="button" className={`rounded-full border px-4 py-2 text-[12px] font-bold ${active === 'all' ? 'border-[#168aad] bg-[#edf7fa] text-[#0878b0]' : 'border-[#d7e4e9] bg-white text-[#607783]'}`} onClick={() => setActive('all')} data-testid="button-chronicles-all">All notes</button>{tagOptions.map((tag) => <Link key={tag} href={`/chronicles/${tag.slice(1)}`} className={`rounded-full border px-4 py-2 text-[12px] font-bold ${active === tag ? 'border-[#168aad] bg-[#edf7fa] text-[#0878b0]' : 'border-[#d7e4e9] bg-white text-[#607783]'}`} data-testid={`link-chronicle-tag-${tag.slice(1)}`}>{tag}</Link>)}</div><div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{list.map((item) => <ChronicleCard item={item} key={item.id} />)}</div></section></main></Shell>;
+  return <Shell><main><section className="border-b border-[#dedbd0] bg-[#eeebe2]"><div className="sk-container py-14 sm:py-20"><p className="sk-eyebrow">The Staykolo blog</p><h1 className="sk-display mt-3 text-[42px] font-bold text-[#1b1d18] sm:text-[56px]">Useful notes for your Bengaluru move.</h1><p className="mt-4 max-w-[590px] text-[16px] leading-7 text-[#686a61]">Practical guides for finding a PG, planning a visit and settling into a new neighbourhood.</p></div></section><section className="sk-container py-12"><div className="flex flex-wrap gap-2" aria-label="Blog topics"><button type="button" className={`rounded-full border px-4 py-2 text-[12px] font-bold ${active === 'all' ? 'border-[#1b1d18] bg-[#1b1d18] text-white' : 'border-[#d4d0c6] bg-[#f7f5ed] text-[#55574e]'}`} onClick={() => setActive('all')} data-testid="button-blogs-all">All articles</button>{tagOptions.map((tag) => <button key={tag} type="button" onClick={() => setActive(tag)} className={`rounded-full border px-4 py-2 text-[12px] font-bold ${active === tag ? 'border-[#1b1d18] bg-[#1b1d18] text-white' : 'border-[#d4d0c6] bg-[#f7f5ed] text-[#55574e]'}`}>{tag.replace('#', '')}</button>)}</div><div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">{list.map((item) => <BlogCard item={item} key={item.id} />)}</div></section></main></Shell>;
 }
-export function ChronicleTagPage() {
+export function BlogTagPage() {
   const { tag } = useParams<{ tag: string }>(); const fullTag = `#${tag}`; const list = chronicles.filter((item) => item.tag === fullTag);
-  return <Shell><main className="sk-container py-12"><Link href="/chronicles" className="inline-flex items-center gap-1 text-[12px] font-bold text-[#0878b0]" data-testid="link-back-chronicles"><ArrowLeft size={14} /> All Chronicles</Link><p className="sk-eyebrow mt-10">Chronicles tag</p><h1 className="sk-display mt-2 text-[42px] font-bold text-[#18364a]">{fullTag}</h1>{list.length ? <div className="mt-8 grid gap-4 md:grid-cols-2">{list.map((item) => <ChronicleCard item={item} key={item.id} />)}</div> : <div className="sk-card mt-8 max-w-[580px] p-8"><FileText className="text-[#168aad]" size={25} /><h2 className="sk-display mt-4 text-[22px] font-bold text-[#18364a]">No notes under this tag yet.</h2><p className="mt-2 text-[13px] leading-6 text-[#6d7e88]">Try one of the current Chronicle tags or return to the full notes index.</p><Link href="/chronicles" className="sk-button sk-button-secondary mt-5" data-testid="link-unknown-tag-chronicles">Browse all Chronicles <ArrowRight size={15} /></Link></div>}</main></Shell>;
+  return <Shell><main className="sk-container py-12"><Link href="/blogs" className="inline-flex items-center gap-1 text-[12px] font-bold text-[#1b1d18]" data-testid="link-back-blogs"><ArrowLeft size={14} /> All blog articles</Link><p className="sk-eyebrow mt-10">Blog topic</p><h1 className="sk-display mt-2 text-[42px] font-bold text-[#1b1d18]">{fullTag}</h1>{list.length ? <div className="mt-8 grid gap-4 md:grid-cols-2">{list.map((item) => <BlogCard item={item} key={item.id} />)}</div> : <div className="sk-card mt-8 max-w-[580px] p-8"><FileText className="text-[#728f2c]" size={25} /><h2 className="sk-display mt-4 text-[22px] font-bold text-[#1b1d18]">No articles under this topic yet.</h2><p className="mt-2 text-[13px] leading-6 text-[#686a61]">Try another blog topic or return to all articles.</p><Link href="/blogs" className="sk-button sk-button-secondary mt-5" data-testid="link-unknown-tag-blogs">Browse all blogs <ArrowRight size={15} /></Link></div>}</main></Shell>;
+}
+
+export function BlogArticlePage() {
+  const { slug } = useParams<{ slug: string }>();
+  const item = chronicles.find((article) => article.id === slug);
+
+  useEffect(() => {
+    if (!item) return;
+    const previousTitle = document.title;
+    const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    const keywords = document.querySelector<HTMLMetaElement>('meta[name="keywords"]');
+    const previousDescription = description?.content;
+    const previousKeywords = keywords?.content;
+    if (description) description.content = item.copy;
+    if (keywords) keywords.content = [...item.primaryKeywords, ...item.secondaryKeywords].join(', ');
+    document.title = `${item.title} | StayKolo`;
+    return () => {
+      document.title = previousTitle;
+      if (description && previousDescription !== undefined) description.content = previousDescription;
+      if (keywords && previousKeywords !== undefined) keywords.content = previousKeywords;
+    };
+  }, [item]);
+
+  if (!item) return <Shell><main className="sk-container min-h-[60vh] py-14"><p className="sk-eyebrow">Article not found</p><h1 className="sk-display mt-3 text-3xl font-bold">This article is not available.</h1><Link href="/blogs" className="sk-button sk-button-primary mt-6">Browse all blogs <ArrowRight size={15} /></Link></main></Shell>;
+
+  const relatedArticles = chronicles.filter((article) => article.id !== item.id).slice(0, 3);
+  return <Shell><main><article className="mx-auto max-w-[900px] px-5 py-12 sm:px-8 sm:py-16"><Link href="/blogs" className="inline-flex items-center gap-1 text-[12px] font-bold text-[#1b1d18]"><ArrowLeft size={14} /> All articles</Link><header className="mt-9 border-b border-[#dedbd0] pb-8"><p className="sk-eyebrow">{item.tag.replace('#', '')} · {item.date} · {item.read}</p><h1 className="sk-display mt-3 text-[36px] font-bold leading-tight tracking-[-.04em] text-[#1b1d18] sm:text-[50px]">{item.title}</h1><p className="mt-5 text-[16px] leading-7 text-[#686a61]">{item.copy}</p></header><div className="prose-staykolo mt-8 space-y-8">{item.sections.map((section) => <section key={section.heading}><h2 className="sk-display text-[23px] font-bold text-[#1b1d18]">{section.heading}</h2><p className="mt-3 text-[15px] leading-7 text-[#55574e]">{section.content}</p></section>)}</div><section className="mt-10 rounded-[18px] border border-[#dedbd0] bg-[#eeebe2] p-5"><h2 className="text-[11px] font-bold uppercase tracking-[.12em] text-[#55574e]">Search topics</h2><p className="mt-3 text-[11px] font-bold text-[#526b1b]">Primary keywords</p><p className="mt-1 text-[12px] leading-6 text-[#686a61]">{item.primaryKeywords.join(' · ')}</p><p className="mt-3 text-[11px] font-bold text-[#526b1b]">Related keywords</p><p className="mt-1 text-[12px] leading-6 text-[#686a61]">{item.secondaryKeywords.join(' · ')}</p></section><section className="mt-8"><h2 className="sk-display text-xl font-bold text-[#1b1d18]">Keep exploring</h2><div className="mt-3 grid gap-3 sm:grid-cols-3">{relatedArticles.map((article) => <Link key={article.id} href={`/blogs/article/${article.id}`} className="rounded-xl border border-[#dedbd0] bg-[#f7f5ed] p-4 text-sm font-semibold text-[#1b1d18] hover:border-[#a5bd55]">{article.title}<span className="mt-2 block text-[10px] font-medium text-[#686a61]">{article.tag.replace('#', '')} · Read article</span></Link>)}</div><Link href="/search" className="mt-5 inline-flex items-center gap-2 text-xs font-bold text-[#526b1b]">Explore available PG listings <ArrowRight size={13} /></Link></section></article></main></Shell>;
 }
 
 const legalSections = {
@@ -1802,8 +1611,8 @@ const legalSections = {
 } as const;
 
 export function LegalPage({ kind }: { kind: keyof typeof legalSections }) {
-  const [confirm, setConfirm] = useState(false); const [requested, setRequested] = useState(false); const isTerms = kind === 'terms'; const isPrivacy = kind === 'privacy'; const title = isTerms ? 'Terms of Service & User Agreement' : isPrivacy ? 'Privacy Policy' : 'Account & Data Deletion Policy'; const sections = legalSections[kind];
-  return <Shell><main className="sk-container py-10 sm:py-14"><div className="max-w-[850px]"><p className="sk-eyebrow">Staykolo legal</p><h1 className="sk-display mt-3 text-[36px] font-bold leading-tight text-[#18364a] sm:text-[46px]">{title}</h1><p className="mt-4 text-[13px] leading-6 text-[#6d7e88]">Effective Date: <strong className="text-[#405966]">26 September 2026</strong> · Governing Jurisdiction: <strong className="text-[#405966]">Bengaluru, Karnataka, India</strong></p></div><div className="mt-10 grid gap-10 lg:grid-cols-[210px_1fr]"><aside className="lg:sticky lg:top-5 lg:self-start"><details className="sk-card p-4 lg:open"><summary className="cursor-pointer list-none text-[12px] font-bold text-[#355364]">On this page</summary><nav className="mt-3 space-y-2 border-t border-[#edf1f3] pt-3">{sections.map(([id, heading]) => <a href={`#section-${id.replace('.', '-')}`} key={id} className="block text-[11px] leading-4 text-[#0878b0] hover:underline" data-testid={`link-toc-${id.replace('.', '-')}`}>{id}. {heading}</a>)}</nav></details>{isTerms && <Link href="/legal/privacy" className="mt-4 block text-[11px] font-semibold text-[#0878b0]" data-testid="link-legal-privacy">Read Privacy Policy <ArrowRight size={12} className="inline" /></Link>}{isPrivacy && <Link href="/legal/data-deletion" className="mt-4 block text-[11px] font-semibold text-[#0878b0]" data-testid="link-legal-deletion">Read Data Deletion Policy <ArrowRight size={12} className="inline" /></Link>}</aside><article className="max-w-[700px]"><div className="mb-8 rounded-lg border border-[#cfe2e6] bg-[#edf7fa] p-5 text-[13px] leading-6 text-[#4e6b77]">This document is a structured demo policy for Staykolo, operated by CoreForge. Please read the sections relevant to your use of the Platform.</div>{sections.map(([id, heading, copy]) => <section id={`section-${id.replace('.', '-')}`} key={id} className="scroll-mt-6 border-b border-[#e5edef] py-7 first:pt-0"><h2 className="sk-display text-[23px] font-bold text-[#18364a]"><span className="mr-2 text-[#168aad]">{id}</span>{heading}</h2><div className="mt-4 space-y-4 text-[14px] leading-7 text-[#586f7b]">{copy.split('\n\n').map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div></section>)}{kind === 'deletion' && <div className="mt-8">{requested ? <div className="rounded-lg bg-[#e4f4f7] p-5 text-[13px] text-[#176d73]" role="status"><Check className="mb-2" size={18} />Deletion request prepared for this demo. No data was deleted.</div> : <button type="button" className="sk-button sk-button-primary" onClick={() => setConfirm(true)} data-testid="button-request-deletion">Request deletion <ArrowRight size={15} /></button>}</div>}</article></div></main>{confirm && <Modal title="Request account deletion?" onClose={() => setConfirm(false)}><p className="mt-4 text-[13px] leading-6 text-[#647782]">This demo will only record that you requested deletion. It will not delete an account or contact a real support team.</p><div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" className="sk-button sk-button-secondary" onClick={() => setConfirm(false)} data-testid="button-cancel-deletion">Cancel</button><button type="button" className="sk-button sk-button-primary" onClick={() => { setRequested(true); setConfirm(false); }} data-testid="button-confirm-deletion">Confirm request</button></div></Modal>}</Shell>;
+  const [confirm, setConfirm] = useState(false); const [requested, setRequested] = useState(false); const [requestName, setRequestName] = useState(readWebsiteProfile()?.name ?? ''); const [requestContact, setRequestContact] = useState(readWebsiteProfile()?.contact ?? ''); const [requestReason, setRequestReason] = useState(''); const [requestError, setRequestError] = useState(''); const isTerms = kind === 'terms'; const isPrivacy = kind === 'privacy'; const title = isTerms ? 'Terms of Service & User Agreement' : isPrivacy ? 'Privacy Policy' : 'Account & Data Deletion Policy'; const sections = legalSections[kind];
+  return <Shell><main className="sk-container py-10 sm:py-14"><div className="max-w-[850px]"><p className="sk-eyebrow">Staykolo legal</p><h1 className="sk-display mt-3 text-[36px] font-bold leading-tight text-[#18364a] sm:text-[46px]">{title}</h1><p className="mt-4 text-[13px] leading-6 text-[#6d7e88]">Effective Date: <strong className="text-[#405966]">26 September 2026</strong> · Governing Jurisdiction: <strong className="text-[#405966]">Bengaluru, Karnataka, India</strong></p></div><div className="mt-10 grid gap-10 lg:grid-cols-[210px_1fr]"><aside className="lg:sticky lg:top-5 lg:self-start"><details className="sk-card p-4 lg:open"><summary className="cursor-pointer list-none text-[12px] font-bold text-[#355364]">On this page</summary><nav className="mt-3 space-y-2 border-t border-[#edf1f3] pt-3">{sections.map(([id, heading]) => <a href={`#section-${id.replace('.', '-')}`} key={id} className="block text-[11px] leading-4 text-[#0878b0] hover:underline" data-testid={`link-toc-${id.replace('.', '-')}`}>{id}. {heading}</a>)}</nav></details>{isTerms && <Link href="/legal/privacy" className="mt-4 block text-[11px] font-semibold text-[#0878b0]" data-testid="link-legal-privacy">Read Privacy Policy <ArrowRight size={12} className="inline" /></Link>}{isPrivacy && <Link href="/legal/data-deletion" className="mt-4 block text-[11px] font-semibold text-[#0878b0]" data-testid="link-legal-deletion">Read Data Deletion Policy <ArrowRight size={12} className="inline" /></Link>}</aside><article className="max-w-[700px]"><div className="mb-8 rounded-lg border border-[#cfe2e6] bg-[#edf7fa] p-5 text-[13px] leading-6 text-[#4e6b77]">This document is a structured demo policy for Staykolo, operated by CoreForge. Please read the sections relevant to your use of the Platform.</div>{sections.map(([id, heading, copy]) => <section id={`section-${id.replace('.', '-')}`} key={id} className="scroll-mt-6 border-b border-[#e5edef] py-7 first:pt-0"><h2 className="sk-display text-[23px] font-bold text-[#18364a]"><span className="mr-2 text-[#168aad]">{id}</span>{heading}</h2><div className="mt-4 space-y-4 text-[14px] leading-7 text-[#586f7b]">{copy.split('\n\n').map((paragraph, index) => <p key={index}>{paragraph}</p>)}</div></section>)}{kind === 'deletion' && <div className="mt-8">{requested ? <div className="rounded-lg bg-[#e4f4f7] p-5 text-[13px] text-[#176d73]" role="status"><Check className="mb-2" size={18} />Deletion request prepared for this demo. No data was deleted.</div> : <button type="button" className="sk-button sk-button-primary" onClick={() => setConfirm(true)} data-testid="button-request-deletion">Request deletion <ArrowRight size={15} /></button>}</div>}</article></div></main>{confirm && <Modal title="Request account deletion?" onClose={() => setConfirm(false)}><p className="mt-4 text-[13px] leading-6 text-[#647782]">This demonstration records the request only in this browser. It does not delete data or contact support.</p><div className="mt-4 space-y-3"><Field label="Full name" name="deletion-name" value={requestName} onChange={setRequestName} placeholder="Your name" /><Field label="Account phone or email" name="deletion-contact" value={requestContact} onChange={setRequestContact} placeholder="Phone number or email" /><label className="block text-[11px] font-semibold text-[#42443c]">Reason (optional)<textarea value={requestReason} onChange={(event) => setRequestReason(event.target.value)} className="sk-input mt-1 min-h-20" placeholder="Tell us why you are requesting deletion" /></label></div>{requestError && <p className="mt-3 text-xs text-[#b55b25]" role="alert">{requestError}</p>}<div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end"><button type="button" className="sk-button sk-button-secondary" onClick={() => setConfirm(false)} data-testid="button-cancel-deletion">Cancel</button><button type="button" className="sk-button sk-button-primary" onClick={() => { if (!requestName.trim() || !requestContact.trim()) { setRequestError('Enter your name and the contact linked to the account.'); return; } try { localStorage.setItem('staykolo.deletionRequest', JSON.stringify({ name: requestName.trim(), contact: requestContact.trim(), reason: requestReason.trim(), requestedAt: new Date().toISOString() })); setRequested(true); setConfirm(false); } catch { setRequestError('The request could not be saved in this browser. Please try again.'); } }} data-testid="button-confirm-deletion">Submit request</button></div></Modal>}</Shell>;
 }
 
 /* ========== ABOUT PAGE (#16, #17, #50) ========== */
@@ -1811,7 +1620,7 @@ export function AboutPage() {
   return (
     <Shell>
       <main>
-        <section className="border-b border-[#dfe9ee] bg-[#edf7fa]">
+        <section className="border-b border-[#dedbd0] bg-[#eeebe2]">
           <div className="sk-container py-14 sm:py-20">
             <div className="flex items-center gap-2.5 mb-3">
               <KarnatakaFlag className="h-4 w-6" />
@@ -1888,7 +1697,7 @@ export function ContactPage() {
         return 'verify';
       }
     }
-    return 'verify';
+    return 'contact';
   });
 
   // General Contact Form State
@@ -1923,18 +1732,18 @@ export function ContactPage() {
     <Shell>
       <main>
         {/* Hero Section */}
-        <section className="border-b border-[#dfe9ee] bg-[#edf7fa]">
+        <section className="border-b border-[#dedbd0] bg-[#eeebe2]">
           <div className="sk-container py-12 sm:py-16">
             <div className="flex items-center gap-2 mb-2">
               <KarnatakaFlag className="h-3.5 w-5" />
               <p className="sk-eyebrow">StayKolo Support & PG Onboarding</p>
             </div>
-            <h1 className="sk-display mt-2 text-[36px] font-bold text-[#18364a] sm:text-[46px]">
+            <h1 className="sk-display mt-2 text-[36px] font-bold text-[#1b1d18] sm:text-[46px]">
               {activeTab === 'verify'
                 ? 'Get Your PG Verified on StayKolo'
                 : 'Contact StayKolo Operations'}
             </h1>
-            <p className="mt-3 max-w-[620px] text-[15px] leading-7 text-[#59717e]">
+            <p className="mt-3 max-w-[620px] text-[15px] leading-7 text-[#686a61]">
               {activeTab === 'verify'
                 ? 'Enter your PG name, contact phone number, and Google Maps location URL to get listed and verified.'
                 : 'Have questions about platform features, tenant move-ins, or need direct support? We are ready to assist you.'}
@@ -1944,25 +1753,25 @@ export function ContactPage() {
             <div className="mt-8 flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => setActiveTab('verify')}
-                className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs font-bold transition-all ${
-                  activeTab === 'verify'
-                    ? 'bg-[#0878b0] text-white shadow-sm'
-                    : 'bg-white text-[#4d626f] border border-[#d9e3e8] hover:bg-[#f5f8f9]'
-                }`}
-              >
-                <ShieldCheck size={16} /> Get Verified (List Your PG)
-              </button>
-              <button
-                type="button"
                 onClick={() => setActiveTab('contact')}
                 className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs font-bold transition-all ${
                   activeTab === 'contact'
-                    ? 'bg-[#0878b0] text-white shadow-sm'
-                    : 'bg-white text-[#4d626f] border border-[#d9e3e8] hover:bg-[#f5f8f9]'
+                    ? 'bg-[#1b1d18] text-[#d6f36a] shadow-sm'
+                    : 'bg-[#f7f5ed] text-[#55574e] border border-[#d4d0c6] hover:border-[#829e39]'
                 }`}
               >
-                <Mail size={16} /> General Support & Inquiries
+                <Mail size={16} /> Contact StayKolo Operations
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('verify')}
+                className={`inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs font-bold transition-all ${
+                  activeTab === 'verify'
+                    ? 'bg-[#1b1d18] text-[#d6f36a] shadow-sm'
+                    : 'bg-[#f7f5ed] text-[#55574e] border border-[#d4d0c6] hover:border-[#829e39]'
+                }`}
+              >
+                <ShieldCheck size={16} /> Verify your PG
               </button>
             </div>
           </div>
