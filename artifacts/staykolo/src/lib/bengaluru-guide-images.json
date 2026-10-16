@@ -1,0 +1,507 @@
+[
+  {
+    "name": "Vidhana Soudha",
+    "category": "Landmarks & history",
+    "image": "/images/bengaluru-guide/place-01.jpg",
+    "sourceTitle": "Vidhana Soudha, front (01).jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Vidhana_Soudha,_front_(01).jpg",
+    "author": "Moheen Reeyad",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Lalbagh Botanical Garden",
+    "category": "Parks & greenery",
+    "image": "/images/bengaluru-guide/place-02.jpg",
+    "sourceTitle": "Lalbagh (Lal Baugh) Botanical Garden in Bangalore (now Bengaluru) 1.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Lalbagh_(Lal_Baugh)_Botanical_Garden_in_Bangalore_(now_Bengaluru)_1.jpg",
+    "author": "CreativoCamaal (Lens Naayak Photography)",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Bengaluru Palace",
+    "category": "Landmarks & history",
+    "image": "/images/bengaluru-guide/place-03.jpg",
+    "sourceTitle": "BANGALORE PALACE.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:BANGALORE_PALACE.jpg",
+    "author": "Basavaraj M",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Cubbon Park",
+    "category": "Parks & greenery",
+    "image": "/images/bengaluru-guide/place-04.jpg",
+    "sourceTitle": "Band-Stand-Cubbon-Park-Bengaluru-karnataka-India.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Band-Stand-Cubbon-Park-Bengaluru-karnataka-India.jpg",
+    "author": "N. Vivekananthamoorthy",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Tipu Sultan’s Summer Palace",
+    "category": "Landmarks & history",
+    "image": "/images/bengaluru-guide/place-05.jpg",
+    "sourceTitle": "Tipu Sultan's Palace in Bengaluru.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tipu_Sultan%27s_Palace_in_Bengaluru.jpg",
+    "author": "Sumit Surai",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Bangalore Fort",
+    "image": "/images/bengaluru-guide/place-06.jpg",
+    "sourceTitle": "Old Bangalore Fort, Inside View.JPG",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Old_Bangalore_Fort,_Inside_View.JPG",
+    "author": "Pavithrah",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "KR Market",
+    "image": "/images/bengaluru-guide/place-07.jpg",
+    "sourceTitle": "Aerial view of KR Market and the Mysore Road Flyover.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Aerial_view_of_KR_Market_and_the_Mysore_Road_Flyover.jpg",
+    "author": "Vinu Thomas from Bangalore, India",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Church Street",
+    "image": "/images/bengaluru-guide/place-08.jpg",
+    "sourceTitle": "Arches in Church street, Bengaluru (2026).jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Arches_in_Church_street,_Bengaluru_(2026).jpg",
+    "author": "Gpkp",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Commercial Street",
+    "image": "/images/bengaluru-guide/place-09.jpg",
+    "sourceTitle": "Colours of Bangalore. Commercial Street, Bangalore. (42032485620).jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Colours_of_Bangalore._Commercial_Street,_Bangalore._(42032485620).jpg",
+    "author": "Rajeev K from Bangalore, India",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "MG Road",
+    "image": "/images/bengaluru-guide/place-10.jpg",
+    "sourceTitle": "Aerial view from Utility building, MG Road, Bangalore (2024) 01.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Aerial_view_from_Utility_building,_MG_Road,_Bangalore_(2024)_01.jpg",
+    "author": "Gpkp",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Ulsoor Lake",
+    "image": "/images/bengaluru-guide/place-11.jpg",
+    "sourceTitle": "Sunrise Ulsoor Lake 19.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sunrise_Ulsoor_Lake_19.jpg",
+    "author": "Swaminathan",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Attara Kacheri (Karnataka High Court)",
+    "image": "/images/bengaluru-guide/place-12.jpg",
+    "sourceTitle": "High Court-1-bengaluru-India.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:High_Court-1-bengaluru-India.jpg",
+    "author": "Yercaud-elango",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Jawaharlal Nehru Planetarium",
+    "image": "/images/bengaluru-guide/place-13.jpg",
+    "sourceTitle": "Jawaharlal Nehru Planetarium, Bangalore 02.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jawaharlal_Nehru_Planetarium,_Bangalore_02.jpg",
+    "author": "Gpkp",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Visvesvaraya Industrial & Technological Museum",
+    "image": "/images/bengaluru-guide/place-14.jpg",
+    "sourceTitle": "Replica of Wright Flyer at Visvesvaraya Ind and Tech Museum Bengaluru.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Replica_of_Wright_Flyer_at_Visvesvaraya_Ind_and_Tech_Museum_Bengaluru.jpg",
+    "author": "N. Vivekananthamoorthy",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "National Gallery of Modern Art",
+    "image": "/images/bengaluru-guide/place-15.jpg",
+    "sourceTitle": "National Gallery of Modern Art, Bangalore (2025) 04.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:National_Gallery_of_Modern_Art,_Bangalore_(2025)_04.jpg",
+    "author": "Gpkp",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Government Museum, Bengaluru",
+    "image": "/images/bengaluru-guide/place-16.jpg",
+    "sourceTitle": "Canon at Karnataka Government Museum 2.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Canon_at_Karnataka_Government_Museum_2.jpg",
+    "author": "Krishna Chaitanya Velaga",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Venkatappa Art Gallery",
+    "image": "/images/bengaluru-guide/place-17.jpg",
+    "sourceTitle": "Venkatappa Art Gallery, Bengaluru (2026) 12.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Venkatappa_Art_Gallery,_Bengaluru_(2026)_12.jpg",
+    "author": "Gpkp",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Sankey Tank",
+    "image": "/images/bengaluru-guide/place-18.jpg",
+    "sourceTitle": "Sankey Tank (Sankey Lake) - panoramio.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sankey_Tank_(Sankey_Lake)_-_panoramio.jpg",
+    "author": "Eric Phelps",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "ISKCON Bengaluru",
+    "image": "/images/bengaluru-guide/place-19.jpg",
+    "sourceTitle": "Iskcon bengaluru.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Iskcon_bengaluru.jpg",
+    "author": "Anoop sai kashyap",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Bull Temple, Basavanagudi",
+    "image": "/images/bengaluru-guide/place-20.jpg",
+    "sourceTitle": "Bull temple Mast.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bull_temple_Mast.jpg",
+    "author": "Picsnapr",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Gavi Gangadhareshwara Temple",
+    "image": "/images/bengaluru-guide/place-21.jpg",
+    "sourceTitle": "Gavi Gangadhareshwara temple, Bengaluru.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gavi_Gangadhareshwara_temple,_Bengaluru.jpg",
+    "author": "Dineshkannambadi",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Ragigudda Sri Prasanna Anjaneyaswamy Temple",
+    "image": "/images/bengaluru-guide/place-22.jpg",
+    "sourceTitle": "Ragigudda temple, Bangalore (2025) 01.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Ragigudda_temple,_Bangalore_(2025)_01.jpg",
+    "author": "Gpkp",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Bannerghatta Biological Park",
+    "image": "/images/bengaluru-guide/place-23.jpg",
+    "sourceTitle": "Bannerghatta Biological Park, Bengaluru, India (Unsplash).jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bannerghatta_Biological_Park,_Bengaluru,_India_(Unsplash).jpg",
+    "author": "Nashad Abdu nashadabdu",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Bannerghatta National Park",
+    "image": "/images/bengaluru-guide/place-24.jpg",
+    "sourceTitle": "Bannerghatta National Park-1.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bannerghatta_National_Park-1.jpg",
+    "author": "Sharath Venkatagiri",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Lalbagh Glass House",
+    "image": "/images/bengaluru-guide/place-25.jpg",
+    "sourceTitle": "Glass house Lalbagh.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Glass_house_Lalbagh.jpg",
+    "author": "Jyothi Sundar",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Lalbagh Rock",
+    "image": "/images/bengaluru-guide/place-26.jpg",
+    "sourceTitle": "Gneiss Rock.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Gneiss_Rock.jpg",
+    "author": "Ramyajagadish",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Basavanagudi Gandhi Bazaar",
+    "image": "/images/bengaluru-guide/place-27.jpg",
+    "sourceTitle": "Bonda masala from Gandhi bazaar Basavanagudi.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bonda_masala_from_Gandhi_bazaar_Basavanagudi.jpg",
+    "author": "Mallikarjunasj",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Malleswaram 8th Cross",
+    "image": "/images/bengaluru-guide/place-28.jpg",
+    "sourceTitle": "At Malleswaram vegetable market, Bangalore.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:At_Malleswaram_vegetable_market,_Bangalore.jpg",
+    "author": "Annapoornima koppad",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Jayanagar 4th Block",
+    "image": "/images/bengaluru-guide/place-29.jpg",
+    "sourceTitle": "Tea Block stall in Jayanagar.jpeg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Tea_Block_stall_in_Jayanagar.jpeg",
+    "author": "Omshivaprakash",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Indiranagar 100 Feet Road",
+    "image": "/images/bengaluru-guide/place-30.jpg",
+    "sourceTitle": "Bronze Statue of Dr Rajkumar, 100 feet Road, DhoopanaHalli Bus Stop, Indiranagar, Bengaluru.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bronze_Statue_of_Dr_Rajkumar,_100_feet_Road,_DhoopanaHalli_Bus_Stop,_Indiranagar,_Bengaluru.jpg",
+    "author": "Mallikarjunasj",
+    "license": "CC0",
+    "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/deed.en",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Koramangala 5th Block",
+    "image": "/images/bengaluru-guide/place-31.jpg",
+    "sourceTitle": "Garden wall at Onesta Koramangala.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Garden_wall_at_Onesta_Koramangala.jpg",
+    "author": "ManasaRao",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Hesaraghatta Lake",
+    "image": "/images/bengaluru-guide/place-32.jpg",
+    "sourceTitle": "Black winged Stilt at Hesaraghatta.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Black_winged_Stilt_at_Hesaraghatta.jpg",
+    "author": "Sagar",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Hebbal Lake",
+    "image": "/images/bengaluru-guide/place-33.jpg",
+    "sourceTitle": "Hebbal Lake.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Hebbal_Lake.jpg",
+    "author": "V Malik",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Kaikondrahalli Lake",
+    "image": "/images/bengaluru-guide/place-34.jpg",
+    "sourceTitle": "Indian Pond Heron, Kaikondrahalli Lake, Bengaluru (53729558).jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Indian_Pond_Heron,_Kaikondrahalli_Lake,_Bengaluru_(53729558).jpg",
+    "author": "S D",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Agara Lake",
+    "image": "/images/bengaluru-guide/place-35.jpg",
+    "sourceTitle": "Agara Lake.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Agara_Lake.jpg",
+    "author": "Dsuman17",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Puttenahalli Lake",
+    "image": "/images/bengaluru-guide/place-36.jpg",
+    "sourceTitle": "Puttenahalli Lake, JP Nagar, Bangalore.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Puttenahalli_Lake,_JP_Nagar,_Bangalore.jpg",
+    "author": "SlowPhoton",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Jakkur Lake",
+    "image": "/images/bengaluru-guide/place-37.jpg",
+    "sourceTitle": "Jakkur lake Bangalore .jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Jakkur_lake_Bangalore_.jpg",
+    "author": "Shankar Raman",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Thippagondanahalli Reservoir Viewpoint",
+    "image": "/images/bengaluru-guide/place-38.jpg",
+    "sourceTitle": "TGHallidam.JPG",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:TGHallidam.JPG",
+    "author": "Sanjaykattimani at English Wikipedia",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0/",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Nandi Hills",
+    "image": "/images/bengaluru-guide/place-39.jpg",
+    "sourceTitle": "Clouds Nandi hills Bengaluru.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Clouds_Nandi_hills_Bengaluru.jpg",
+    "author": "Subhasisa Panigahi",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Devanahalli Fort",
+    "image": "/images/bengaluru-guide/place-40.jpg",
+    "sourceTitle": "Devanahalli Fort, Bengaluru Rural district in the state of Karnataka 01.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Devanahalli_Fort,_Bengaluru_Rural_district_in_the_state_of_Karnataka_01.jpg",
+    "author": "Pinakpani",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Nrityagram",
+    "image": "/images/bengaluru-guide/place-41.jpg",
+    "sourceTitle": "Odissi danseus.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Odissi_danseus.jpg",
+    "author": "Yogesh Balasubramanian from Bangalore, India",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Innovative Film City",
+    "image": "/images/bengaluru-guide/place-42.jpg",
+    "sourceTitle": "Innovative Film city Bangalore 104624.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Innovative_Film_city_Bangalore_104624.jpg",
+    "author": "Rameshng",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Wonderla Bengaluru",
+    "image": "/images/bengaluru-guide/place-43.jpg",
+    "sourceTitle": "Inside Wonderla Banglore.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Inside_Wonderla_Banglore.jpg",
+    "author": "IM3847",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Shivoham Shiva Temple",
+    "image": "/images/bengaluru-guide/place-44.jpg",
+    "sourceTitle": "Bangalore Shiva.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bangalore_Shiva.jpg",
+    "author": "Indianhilbilly",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "HAL Heritage Centre and Aerospace Museum",
+    "image": "/images/bengaluru-guide/place-45.jpg",
+    "sourceTitle": "HAL Heritage Centre and Aerospace Museum, Bengaluru, India (Ank Kumar) 01.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:HAL_Heritage_Centre_and_Aerospace_Museum,_Bengaluru,_India_(Ank_Kumar)_01.jpg",
+    "author": "Ank Kumar",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Karnataka Chitrakala Parishath",
+    "image": "/images/bengaluru-guide/place-46.jpg",
+    "sourceTitle": "Photography exhibition at Karnataka Chitrakala Parishath Bangalore (2).jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Photography_exhibition_at_Karnataka_Chitrakala_Parishath_Bangalore_(2).jpg",
+    "author": "Vyankatesh Metan",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Freedom Park",
+    "image": "/images/bengaluru-guide/place-47.jpg",
+    "sourceTitle": "Freedom Park, Bengaluru (2024) 04.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Freedom_Park,_Bengaluru_(2024)_04.jpg",
+    "author": "Gpkp",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Bangalore Turf Club",
+    "image": "/images/bengaluru-guide/place-48.jpg",
+    "sourceTitle": "Bangalore Turf Club, Bengaluru, Karnataka, India ( Ank Kumar, Infosys Limited) 01.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Bangalore_Turf_Club,_Bengaluru,_Karnataka,_India_(_Ank_Kumar,_Infosys_Limited)_01.jpg",
+    "author": "Ank Kumar",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "Sree Kanteerava Stadium",
+    "image": "/images/bengaluru-guide/place-49.jpg",
+    "sourceTitle": "Sree Kanteerava Stadium.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Sree_Kanteerava_Stadium.jpg",
+    "author": "KshitizBathwal / Skyscape Photography",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  },
+  {
+    "name": "St. Mark’s Cathedral, Bengaluru",
+    "image": "/images/bengaluru-guide/place-50.jpg",
+    "sourceTitle": "Interiors of St Marks, Bangalore.jpg",
+    "sourceUrl": "https://commons.wikimedia.org/wiki/File:Interiors_of_St_Marks,_Bangalore.jpg",
+    "author": "Kanad Sanyal",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "changes": "Resized by Wikimedia Commons where needed and center-cropped for display."
+  }
+]

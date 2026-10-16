@@ -17,6 +17,7 @@ import {
 import { Link, useLocation } from 'wouter';
 import { MapView } from '@/components/map-view';
 import { SiteFooter, SiteNav } from '@/components/staykolo-ui';
+import { bengaluruDestinations } from '@/lib/bengaluru-guide';
 import { standardAmenities, verifiedPg } from '@/lib/public-listings';
 import pgsJson from '../../mock-data/pgs.json';
 
@@ -25,14 +26,9 @@ const directoryPgs = pgs;
 const quickSearches = ['Koramangala', 'HSR Layout', 'Whitefield', 'Nagarbhavi'];
 const verifiedShowcase = [
   { name: verifiedPg.name, area: verifiedPg.area, address: verifiedPg.address, maps: verifiedPg.googleMapsUrl, demo: false },
-  { name: 'Green Nest PG', area: 'HSR Layout', address: 'HSR Layout, Bengaluru, Karnataka · Demo profile', maps: 'https://www.google.com/maps/search/?api=1&query=HSR+Layout+Bengaluru', demo: true },
-  { name: 'City Grove Stay', area: 'Koramangala', address: 'Koramangala, Bengaluru, Karnataka · Demo profile', maps: 'https://www.google.com/maps/search/?api=1&query=Koramangala+Bengaluru', demo: true },
+  { name: 'Demo PG · Koramangala', area: 'Koramangala', address: 'Demo profile for carousel testing · not a real property.', maps: 'https://www.google.com/maps/search/?api=1&query=Koramangala+Bengaluru', demo: true },
+  { name: 'Demo PG · HSR Layout', area: 'HSR Layout', address: 'Demo profile for carousel testing · not a real property.', maps: 'https://www.google.com/maps/search/?api=1&query=HSR+Layout+Bengaluru', demo: true },
 ];
-const gallerySlides = [
-  { title: 'Vidhana Soudha', label: 'Bengaluru landmark', tone: 'lime', image: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e4/Vidhana_Soudha%2C_front_%2801%29.jpg/960px-Vidhana_Soudha%2C_front_%2801%29.jpg', creditUrl: 'https://commons.wikimedia.org/wiki/File:Vidhana_Soudha,_front_(01).jpg' },
-  { title: 'Lalbagh Botanical Garden', label: 'A quieter side of the city', tone: 'paper', image: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/f/ff/Lalbagh%2C_Bengaluru-12.jpg/960px-Lalbagh%2C_Bengaluru-12.jpg', creditUrl: 'https://commons.wikimedia.org/wiki/File:Lalbagh,_Bengaluru-12.jpg' },
-  { title: 'Bengaluru Palace', label: 'City heritage', tone: 'dark', image: 'https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2c/BANGALORE_PALACE.jpg/960px-BANGALORE_PALACE.jpg', creditUrl: 'https://commons.wikimedia.org/wiki/File:BANGALORE_PALACE.jpg' },
-] as const;
 const neighbourhoods = [
   'Vijaynagar', 'Nagarbhavi', 'Malleshwaram', 'Mathikere', 'Koramangala', 'HSR Layout',
   'Chandra Layout', 'Basaveshwar Nagar', 'Kumaraswamy Layout', 'Bellandur', 'Whitefield', 'Yeshwanthpur',
@@ -41,7 +37,7 @@ const neighbourhoods = [
 export function Home2() {
   const [, setLocation] = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
-  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [guideIndex, setGuideIndex] = useState(0);
   const [verifiedIndex, setVerifiedIndex] = useState(0);
   const [directoryIndex, setDirectoryIndex] = useState(0);
 
@@ -51,22 +47,16 @@ export function Home2() {
     setLocation(query ? `/search?q=${encodeURIComponent(query)}` : '/search');
   };
 
-  const moveGallery = (direction: number) => {
-    setGalleryIndex((index) => (index + direction + gallerySlides.length) % gallerySlides.length);
-  };
-  const moveVerified = (direction: number) => setVerifiedIndex((index) => (index + direction + verifiedShowcase.length) % verifiedShowcase.length);
   const moveDirectory = (direction: number) => setDirectoryIndex((index) => (index + direction + directoryPgs.length) % directoryPgs.length);
+  const moveGuide = (direction: number) => setGuideIndex((index) => (index + direction + bengaluruDestinations.length) % bengaluruDestinations.length);
 
   return (
     <div className="min-h-screen bg-[#f4f1e9] text-[#1b1d18]">
       <SiteNav />
 
       <main>
-        <section className="mx-auto grid max-w-[1320px] gap-7 px-4 pb-8 pt-4 sm:px-8 lg:grid-cols-[1.02fr_.98fr] lg:gap-5 lg:px-12 lg:pb-20 lg:pt-10">
-          <div className="relative flex min-h-[calc(100svh-170px)] flex-col justify-evenly overflow-hidden rounded-[24px] bg-[#1b1d18] p-5 text-[#f7f5ed] sm:min-h-[590px] sm:justify-between sm:rounded-[28px] sm:p-10 lg:p-12">
-            <div className="pointer-events-none absolute inset-0 opacity-60" aria-hidden="true" style={{ backgroundImage: 'radial-gradient(circle at 82% 12%, transparent 0 90px, rgba(255,255,255,.09) 91px 92px, transparent 93px 126px, rgba(255,255,255,.07) 127px 128px, transparent 129px), repeating-linear-gradient(135deg, transparent 0 26px, rgba(255,255,255,.025) 27px 28px, transparent 29px 54px)' }} />
-            <div className="pointer-events-none absolute -right-20 -top-24 hidden h-72 w-72 rounded-full border border-white/10 sm:block sm:h-96 sm:w-96" aria-hidden="true" />
-            <div className="pointer-events-none absolute -right-8 -top-12 hidden h-56 w-56 rounded-full border border-white/10 sm:block sm:h-72 sm:w-72" aria-hidden="true" />
+        <section className="sk-dark-pattern mx-auto grid max-w-[1320px] gap-0 px-0 pb-0 pt-0 sm:gap-7 sm:bg-transparent sm:bg-none sm:px-8 sm:pb-8 sm:pt-4 lg:grid-cols-[1.02fr_.98fr] lg:gap-5 lg:px-12 lg:pb-20 lg:pt-10">
+          <div className="sk-dark-pattern relative flex min-h-[calc(100svh-170px)] flex-col justify-evenly overflow-hidden p-5 text-[#f7f5ed] sm:min-h-[590px] sm:justify-between sm:rounded-[28px] sm:p-10 lg:p-12">
             <div className="relative">
               <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[.06] px-3 py-1.5 text-[10px] font-bold uppercase tracking-[.15em] text-[#d6f36a]">
                 <Sparkles size={12} /> Bengaluru, made easier
@@ -135,19 +125,29 @@ export function Home2() {
           </div>
         </section>
 
-        <section className="bg-[#1b1d18] py-16 text-[#f7f5ed] sm:py-20" id="verified-stays">
+        <section className="sk-dark-pattern py-16 text-[#f7f5ed] sm:py-20" id="verified-stays">
           <div className="mx-auto max-w-[1320px] px-5 sm:px-8 lg:px-12">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[.17em] text-[#d6f36a]">Verified stays</p>
-                <h2 className="sk-display mt-3 text-[34px] font-bold leading-tight tracking-[-.045em] sm:text-[46px]">A shortlist worth your time.</h2>
-                <p className="mt-3 max-w-[480px] text-[14px] leading-6 text-white/55">One confirmed listing and two clearly marked demo profiles.</p>
+                <p className="text-[10px] font-bold uppercase tracking-[.17em] text-[#d6f36a]">PG profile carousel</p>
+                <h2 className="sk-display mt-3 text-[34px] font-bold leading-tight tracking-[-.045em] sm:text-[46px]">A clearer shortlist, one slide at a time.</h2>
+                <p className="mt-3 max-w-[560px] text-[14px] leading-6 text-white/65">One real StayKolo-verified PG and two demo slides for testing. Demo profiles are not real stays and are not verified.</p>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="mr-2 text-[11px] text-white/55">{verifiedIndex + 1} / {verifiedShowcase.length}</span>
-                <button type="button" onClick={() => moveVerified(-1)} className="grid h-10 w-10 place-items-center rounded-full border border-white/25 hover:border-[#d6f36a] hover:text-[#d6f36a]" aria-label="Previous verified PG"><ChevronLeft size={17} /></button>
-                <button type="button" onClick={() => moveVerified(1)} className="grid h-10 w-10 place-items-center rounded-full border border-white/25 hover:border-[#d6f36a] hover:text-[#d6f36a]" aria-label="Next verified PG"><ChevronRight size={17} /></button>
-              </div>
+              {verifiedShowcase.length > 1 && <div className="flex items-center gap-3">
+                <span className="text-[11px] text-white/55">{verifiedIndex + 1} / {verifiedShowcase.length}</span>
+                <div className="flex items-center gap-1.5" role="group" aria-label="Choose a PG profile">
+                  {verifiedShowcase.map((property, index) => (
+                    <button
+                      key={property.name}
+                      type="button"
+                      onClick={() => setVerifiedIndex(index)}
+                      aria-label={`Show PG profile ${index + 1}: ${property.name}`}
+                      aria-pressed={verifiedIndex === index}
+                      className={`h-2.5 rounded-full transition-all ${verifiedIndex === index ? 'w-7 bg-[#d6f36a]' : 'w-2.5 bg-white/35 hover:bg-white/70'}`}
+                    />
+                  ))}
+                </div>
+              </div>}
             </div>
 
             <article className="relative mt-9 min-h-[245px] overflow-hidden rounded-[18px] bg-[#d6f36a] p-5 text-[#1b1d18] shadow-lg sm:min-h-[270px] sm:p-7" aria-live="polite">
@@ -155,14 +155,19 @@ export function Home2() {
               <div className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-r from-[#526b1b]/[.12] via-[#d6f36a]/[.08] to-transparent" aria-hidden="true" />
               <ShieldCheck aria-hidden="true" className="absolute right-5 top-5 z-10 h-8 w-8 text-[#1b1d18]/60 sm:right-7 sm:top-7" />
               <div className="relative z-10 max-w-[720px]">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-[#1b1d18] px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.1em] text-[#d6f36a]"><ShieldCheck size={12} /> {verifiedShowcase[verifiedIndex].demo ? 'Demo verified profile' : 'StayKolo verified'}</span>
+                <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[9px] font-bold uppercase tracking-[.1em] ${verifiedShowcase[verifiedIndex].demo ? 'bg-[#f7f5ed] text-[#1b1d18]' : 'bg-[#1b1d18] text-[#d6f36a]'}`}>
+                  {verifiedShowcase[verifiedIndex].demo ? <Sparkles size={12} /> : <ShieldCheck size={12} />}
+                  {verifiedShowcase[verifiedIndex].demo ? 'Demo only · not verified' : 'StayKolo verified'}
+                </span>
                 <h3 className="sk-display mt-3 text-[23px] font-extrabold tracking-[-.04em] sm:text-[28px]">{verifiedShowcase[verifiedIndex].name}</h3>
                 <p className="mt-1 flex items-start gap-1.5 text-[12px] text-[#394327]"><MapPin size={14} className="mt-0.5 shrink-0" />{verifiedShowcase[verifiedIndex].address}</p>
-                <div className="mt-4 flex flex-wrap gap-2">
+                {!verifiedShowcase[verifiedIndex].demo && <div className="mt-4 flex flex-wrap gap-2">
                   {standardAmenities.map((amenity) => <span key={amenity} className="inline-flex items-center gap-1.5 rounded-full bg-[#f7f5ed]/75 px-3 py-1.5 text-[10px] font-bold">{amenity === 'Wi-Fi' ? <Wifi size={12} /> : amenity === 'Water' ? <Droplets size={12} /> : <Fan size={12} />}{amenity}</span>)}
-                </div>
+                </div>}
                 <div className="mt-5 flex flex-wrap items-center gap-3">
-                  {!verifiedShowcase[verifiedIndex].demo && <Link href={`/pg/${verifiedPg.slug}`} className="inline-flex items-center gap-2 rounded-full bg-[#1b1d18] px-4 py-3 text-[11px] font-bold text-white">View details <ArrowRight size={13} /></Link>}
+                  {verifiedShowcase[verifiedIndex].demo
+                    ? <Link href={`/search?q=${encodeURIComponent(verifiedShowcase[verifiedIndex].area)}`} className="inline-flex items-center gap-2 rounded-full bg-[#1b1d18] px-4 py-3 text-[11px] font-bold text-white">Search this area <ArrowRight size={13} /></Link>
+                    : <Link href={`/pg/${verifiedPg.slug}`} className="inline-flex items-center gap-2 rounded-full bg-[#1b1d18] px-4 py-3 text-[11px] font-bold text-white">View details <ArrowRight size={13} /></Link>}
                   <a href={verifiedShowcase[verifiedIndex].maps} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 rounded-full border border-[#1b1d18]/25 bg-[#f7f5ed] px-4 py-3 text-[11px] font-bold text-[#1b1d18]">Google Maps <ExternalLink size={13} /></a>
                 </div>
               </div>
@@ -233,52 +238,24 @@ export function Home2() {
           </div>
         </section>
 
-        <section className="overflow-hidden bg-[#1b1d18] py-16 text-[#f7f5ed] sm:py-20" aria-label="Bengaluru gallery">
-          <div className="mx-auto grid max-w-[1320px] gap-10 px-5 sm:px-8 lg:grid-cols-[.75fr_1.25fr] lg:items-center lg:px-12">
+        <section className="sk-dark-pattern py-14 text-[#f7f5ed] sm:py-20" aria-label="Bengaluru city guide">
+          <div className="mx-auto grid max-w-[1320px] gap-8 px-5 sm:px-8 lg:grid-cols-[.75fr_1.25fr] lg:items-center lg:px-12">
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[.17em] text-[#d6f36a]">Life around the city</p>
-              <h2 className="sk-display mt-3 text-[34px] font-bold leading-tight tracking-[-.045em] sm:text-[44px]">Bengaluru, at your pace.</h2>
-              <p className="mt-3 max-w-[410px] text-[13px] leading-6 text-white/60">A few real Bengaluru landmarks and green spaces, captured in a light, compact gallery.</p>
+              <p className="text-[10px] font-bold uppercase tracking-[.17em] text-[#d6f36a]">Life around the city · 50 places</p>
+              <h2 className="sk-display mt-3 text-[34px] font-bold leading-tight tracking-[-.045em] sm:text-[44px]">Bengaluru, one place at a time.</h2>
+              <p className="mt-3 max-w-[410px] text-[13px] leading-6 text-white/60">{bengaluruDestinations[guideIndex].description}</p>
+              <p className="mt-3 text-[11px] font-semibold text-white/55">{guideIndex + 1} / {bengaluruDestinations.length} · {bengaluruDestinations[guideIndex].name}</p>
               <div className="mt-6 flex items-center gap-2">
-                <button type="button" onClick={() => moveGallery(-1)} className="grid h-10 w-10 place-items-center rounded-full border border-white/25 transition hover:border-[#d6f36a] hover:text-[#d6f36a]" aria-label="Previous gallery image"><ChevronLeft size={18} /></button>
-                <button type="button" onClick={() => moveGallery(1)} className="grid h-10 w-10 place-items-center rounded-full border border-white/25 transition hover:border-[#d6f36a] hover:text-[#d6f36a]" aria-label="Next gallery image"><ChevronRight size={18} /></button>
-                <span className="ml-2 text-[11px] font-semibold text-white/55">{galleryIndex + 1} / {gallerySlides.length}</span>
+                <button type="button" onClick={() => moveGuide(-1)} className="grid h-10 w-10 place-items-center rounded-full border border-white/25 transition hover:border-[#d6f36a] hover:text-[#d6f36a]" aria-label="Previous Bengaluru destination"><ChevronLeft size={18} /></button>
+                <button type="button" onClick={() => moveGuide(1)} className="grid h-10 w-10 place-items-center rounded-full border border-white/25 transition hover:border-[#d6f36a] hover:text-[#d6f36a]" aria-label="Next Bengaluru destination"><ChevronRight size={18} /></button>
+                <Link href="/bengaluru-guide" className="ml-2 inline-flex items-center gap-2 rounded-full bg-[#d6f36a] px-4 py-2.5 text-[11px] font-bold text-[#1b1d18]">Explore all 50 <ArrowRight size={13} /></Link>
               </div>
             </div>
-            <div className="relative mx-auto h-[310px] w-full max-w-[680px] sm:h-[390px]" aria-live="polite">
-              {gallerySlides.map((slide, index) => {
-                const offset = (index - galleryIndex + gallerySlides.length) % gallerySlides.length;
-                const isFront = offset === 0;
-                const positionClass = isFront
-                  ? 'left-[12%] top-0 z-20 w-[76%] rotate-0 opacity-100'
-                  : offset === 1
-                    ? 'left-[2%] top-10 z-10 w-[76%] -rotate-6 opacity-65'
-                    : 'right-[2%] top-10 z-10 w-[76%] rotate-6 opacity-65';
-                const colorClass = slide.tone === 'lime'
-                  ? 'bg-[#d6f36a] text-[#1b1d18]'
-                  : slide.tone === 'paper'
-                    ? 'bg-[#eeebe2] text-[#1b1d18]'
-                    : 'bg-[#36392f] text-[#f7f5ed]';
-                return (
-                  <button
-                    key={slide.title}
-                    type="button"
-                    onClick={() => setGalleryIndex(index)}
-                    aria-label={`Show gallery image: ${slide.title}`}
-                    aria-current={isFront}
-                    className={`absolute h-[270px] overflow-hidden rounded-[22px] text-left shadow-2xl transition-all duration-500 sm:h-[340px] ${positionClass} ${colorClass}`}
-                  >
-                    <img src={slide.image} alt={slide.title + ', Bengaluru'} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
-                    <span className="absolute inset-0 bg-[#1b1d18]/15" aria-hidden="true" />
-                    <span className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/65 to-transparent p-5 pt-16 sm:p-7 sm:pt-20">
-                      <span className={`block text-[9px] font-bold uppercase tracking-[.17em] ${slide.tone === 'lime' ? 'text-[#526b1b]' : 'text-[#d6f36a]'}`}>{slide.label}</span>
-                      <span className={`sk-display mt-2 block text-[21px] font-extrabold leading-tight tracking-[-.04em] sm:text-[28px] ${slide.tone === 'lime' ? 'text-[#1b1d18]' : 'text-white'}`}>{slide.title}</span>
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-            <p className="mt-1 text-right text-[9px] text-white/50">Photo: <a href={gallerySlides[galleryIndex].creditUrl} target="_blank" rel="noopener noreferrer" className="underline underline-offset-2 hover:text-[#d6f36a]">Wikimedia Commons · {gallerySlides[galleryIndex].title}</a></p>
+            <article className="relative overflow-hidden rounded-[20px] bg-[#36392f]" aria-live="polite">
+              <img key={bengaluruDestinations[guideIndex].image} src={bengaluruDestinations[guideIndex].image} alt={`${bengaluruDestinations[guideIndex].name}, Bengaluru`} loading="lazy" decoding="async" className="aspect-[16/10] w-full object-cover sm:aspect-[16/9]" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent" aria-hidden="true" />
+              <h3 className="sk-display absolute inset-x-0 bottom-0 p-5 text-[22px] font-extrabold tracking-[-.04em] sm:p-7 sm:text-[30px]">{bengaluruDestinations[guideIndex].name}</h3>
+            </article>
           </div>
         </section>
 

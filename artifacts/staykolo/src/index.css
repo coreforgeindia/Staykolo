@@ -114,6 +114,7 @@
   .sk-link { color: #526b1b; font-weight: 600; text-decoration: none; }
   .sk-link:hover { text-decoration: underline; text-underline-offset: 3px; }
   .sk-surface-blue { background: #eeebe2; border: 1px solid #dedbd0; }
+  .sk-dark-pattern { background-color: #1b1d18; background-image: url('/contour-pattern.svg'); background-position: center; background-repeat: no-repeat; background-size: cover; }
   .sk-mono { font-family: var(--font-mono); }
 }
 

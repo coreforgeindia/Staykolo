@@ -1,0 +1,61 @@
+import guideImages from './bengaluru-guide-images.json';
+
+const destinations = [
+  ['Vidhana Soudha', 'Admire the grand seat of Karnataka’s state legislature from the landscaped avenues around it.', 'Landmarks & history'],
+  ['Lalbagh Botanical Garden', 'Explore historic glasshouse architecture, mature trees and peaceful garden paths.', 'Parks & greenery'],
+  ['Bengaluru Palace', 'See the city’s Tudor-inspired palace and its distinctive towers and grounds.', 'Landmarks & history'],
+  ['Cubbon Park', 'Take a shaded walk through this much-loved green space in the heart of the city.', 'Parks & greenery'],
+  ['Tipu Sultan’s Summer Palace', 'Discover ornate timberwork and a glimpse into Bengaluru’s past.', 'Landmarks & history'],
+  ['Bangalore Fort', 'Visit the surviving fort gateway and learn about the old city’s history.', 'Landmarks & history'],
+  ['KR Market', 'Experience a lively traditional market known for its colourful flower stalls.', 'Street food & markets'],
+  ['Church Street', 'Browse independent shops, cafés and bookshops along a popular central street.', 'Street food & markets'],
+  ['Commercial Street', 'Explore a busy shopping district filled with small stores and street-side finds.', 'Street food & markets'],
+  ['MG Road', 'Walk one of central Bengaluru’s best-known shopping and dining corridors.', 'Street food & markets'],
+  ['Ulsoor Lake', 'Enjoy a lakeside walk and views across one of the city’s central water bodies.', 'Parks & greenery'],
+  ['Attara Kacheri (Karnataka High Court)', 'Admire the heritage Attara Kacheri building, home to the High Court of Karnataka, beside Cubbon Park.', 'Landmarks & history'],
+  ['Jawaharlal Nehru Planetarium', 'Explore astronomy exhibits and public sky shows near Sankey Road.', 'Arts, museums & culture'],
+  ['Visvesvaraya Industrial & Technological Museum', 'Try hands-on science exhibits in a museum beside Cubbon Park.', 'Arts, museums & culture'],
+  ['National Gallery of Modern Art', 'View Indian modern art in a heritage mansion surrounded by gardens.', 'Arts, museums & culture'],
+  ['Government Museum, Bengaluru', 'Browse archaeology and natural history collections in one of India’s oldest museums.', 'Arts, museums & culture'],
+  ['Venkatappa Art Gallery', 'See paintings and sculpture in a gallery near Cubbon Park.', 'Arts, museums & culture'],
+  ['Sankey Tank', 'Take a quiet evening stroll around this tree-lined lake in the west of the city.', 'Parks & greenery'],
+  ['ISKCON Bengaluru', 'Visit the hilltop temple complex and its striking architecture in Rajajinagar.', 'Religious places'],
+  ['Bull Temple, Basavanagudi', 'See the historic Dravidian-style temple and its revered Nandi statue.', 'Religious places'],
+  ['Gavi Gangadhareshwara Temple', 'Explore a rock-cut cave temple known for its distinctive setting.', 'Religious places'],
+  ['Ragigudda Sri Prasanna Anjaneyaswamy Temple', 'Find a hilltop temple and calm viewpoints in Jayanagar.', 'Religious places'],
+  ['Bannerghatta Biological Park', 'Plan a day among the park’s nature, safari and conservation experiences.', 'Parks & greenery'],
+  ['Bannerghatta National Park', 'Explore a large forest reserve on the southern edge of Bengaluru.', 'Parks & greenery'],
+  ['Lalbagh Glass House', 'See the landmark glasshouse and seasonal flower displays within Lalbagh.', 'Parks & greenery'],
+  ['Lalbagh Rock', 'Visit an ancient rock formation and viewpoint inside the botanical garden.', 'Parks & greenery'],
+  ['Malleswaram 8th Cross', 'Wander a neighbourhood market street known for local snacks and shopping.', 'Street food & markets'],
+  ['Basavanagudi Gandhi Bazaar', 'Explore a traditional market street with flower stalls and South Indian eateries.', 'Street food & markets'],
+  ['Jayanagar 4th Block', 'Browse a popular neighbourhood shopping hub with cafés and local stores.', 'Street food & markets'],
+  ['Indiranagar 100 Feet Road', 'Find restaurants, cafés and shops along a lively east Bengaluru strip.', 'Street food & markets'],
+  ['Koramangala 5th Block', 'Explore a lively neighbourhood known for cafés, dining and independent stores.', 'Street food & markets'],
+  ['Hesaraghatta Lake', 'Visit the open grassland and lake margins, a seasonal home for a wide range of birds.', 'Parks & greenery'],
+  ['Hebbal Lake', 'Look for birdlife and walking paths around this northern Bengaluru lake.', 'Parks & greenery'],
+  ['Kaikondrahalli Lake', 'Walk the restored lake trail and look for birds in the Bellandur area.', 'Parks & greenery'],
+  ['Agara Lake', 'Enjoy a walking path and open-water views close to HSR Layout.', 'Parks & greenery'],
+  ['Puttenahalli Lake', 'Visit a community-conserved lake and bird habitat in south Bengaluru.', 'Parks & greenery'],
+  ['Jakkur Lake', 'Take in open views and local birdlife at this northern neighbourhood lake.', 'Parks & greenery'],
+  ['Thippagondanahalli Reservoir Viewpoint', 'Discover a scenic reservoir landscape west of the city; confirm public access.', 'Parks & greenery'],
+  ['Nandi Hills', 'Plan an early trip for hilltop views and historic sites north of Bengaluru.', 'Day trips & experiences'],
+  ['Devanahalli Fort', 'Walk around the historic fort near Devanahalli and its old stone gateways.', 'Landmarks & history'],
+  ['Nrityagram', 'Visit a dance village near Hesaraghatta; check visiting hours and event access.', 'Arts, museums & culture'],
+  ['Innovative Film City', 'Explore a family entertainment destination on the Bengaluru–Mysuru road.', 'Day trips & experiences'],
+  ['Wonderla Bengaluru', 'Plan a full day of rides and water attractions on the city outskirts.', 'Day trips & experiences'],
+  ['Shivoham Shiva Temple', 'See the large Shiva statue and temple complex near Old Airport Road.', 'Religious places'],
+  ['HAL Heritage Centre and Aerospace Museum', 'Explore aircraft displays and the story of Indian aviation.', 'Arts, museums & culture'],
+  ['Karnataka Chitrakala Parishath', 'Browse rotating art exhibitions and galleries near Kumara Krupa Road.', 'Arts, museums & culture'],
+  ['Freedom Park', 'Walk through the former prison grounds, now a public park and civic landmark.', 'Landmarks & history'],
+  ['Bangalore Turf Club', 'See the city’s historic racecourse area from nearby public streets.', 'Day trips & experiences'],
+  ['Sree Kanteerava Stadium', 'Find the central stadium and the surrounding sports and civic district.', 'Day trips & experiences'],
+  ['St. Mark’s Cathedral, Bengaluru', 'See the historic church and its stained glass and architectural details near MG Road.', 'Religious places'],
+] as const;
+
+export const bengaluruDestinations = destinations.map(([name, description, category]) => {
+  const image = guideImages.find((item) => item.name === name);
+  if (!image) throw new Error(`Missing image credits for Bengaluru guide destination: ${name}`);
+
+  return { ...image, name, description, category };
+});

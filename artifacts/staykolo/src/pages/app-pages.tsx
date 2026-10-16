@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { MapView } from '@/components/map-view';
 import { BrandKarnatakaBadge, KarnatakaFlag, SectionHeading, SiteFooter, SiteNav } from '@/components/staykolo-ui';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { isStaykoloVerified, standardAmenities, verifiedPg } from '@/lib/public-listings';
 import pgsJson from '../../mock-data/pgs.json';
 
@@ -322,17 +323,21 @@ export function SearchPage() {
               <label htmlFor="quick-hubs" className="flex items-center gap-1 text-xs font-bold text-[#476772]">
                 <Sparkles size={13} className="text-[#168aad]" /> Quick Hubs:
               </label>
-              <select
-                id="quick-hubs"
+              <Select
                 value={selectedHub}
-                onChange={(event) => {
-                  setSelectedHub(event.target.value);
-                  setQuery(event.target.value);
+                onValueChange={(value) => {
+                  setSelectedHub(value);
+                  setQuery(value);
                   setVisibleCount(20);
                 }}
-                className="min-h-10 min-w-[220px] rounded-full border border-[#d3e0e4] bg-white px-4 text-xs font-semibold text-[#476772] outline-none transition-colors focus:border-[#829e39]"
               >
-                <option value="">Choose an area or college</option>
+                <SelectTrigger
+                id="quick-hubs"
+                  className="h-10 min-w-[220px] rounded-full border-[#d4d0c6] bg-[#f7f5ed] px-4 text-xs font-semibold text-[#4c4e46] shadow-none hover:border-[#829e39] focus:ring-2 focus:ring-[#829e39]/25"
+                >
+                  <SelectValue placeholder="Choose an area or college" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-[#d4d0c6] bg-[#f7f5ed] text-[#1b1d18] shadow-lg">
                 {[
                 { label: 'PES University', q: 'PES University' },
                 { label: 'Vijaynagar', q: 'Vijaynagar' },
@@ -345,8 +350,9 @@ export function SearchPage() {
                 { label: 'Dayananda Sagar (DSCE)', q: 'DSCE' },
                 { label: 'Koramangala', q: 'Koramangala' },
                 { label: 'Malleshwaram', q: 'Malleshwaram' },
-                ].map((sug) => <option key={sug.label} value={sug.q}>{sug.label}</option>)}
-              </select>
+                ].map((sug) => <SelectItem key={sug.label} value={sug.q} className="rounded-lg text-xs focus:bg-[#e9f2cd] focus:text-[#1b1d18]">{sug.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Search Filters Bar */}
@@ -456,8 +462,8 @@ export function SearchPage() {
                         <h3 className="sk-display text-[17px] font-bold text-[#1b1d18]">Verified PG <span className="font-sans text-[12px] text-[#77796f]">(1)</span></h3>
                         <p className="mt-1 text-[11px] text-[#77796f]">This is the only PG currently marked verified by StayKolo.</p>
                       </div>
-                      <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2" aria-label="Verified PG carousel">
-                        <article className="relative w-[min(88vw,34rem)] shrink-0 snap-start overflow-hidden rounded-[18px] border border-[#b2c957] bg-[#d6f36a] p-5 shadow-sm">
+                      <div className="w-full min-w-0" aria-label="Verified PG listings">
+                        <article className="relative w-full min-w-0 overflow-hidden rounded-[18px] border border-[#b2c957] bg-[#d6f36a] p-5 shadow-sm">
                           <ShieldCheck aria-hidden="true" className="pointer-events-none absolute -left-3 top-4 z-0 h-32 w-32 text-[#748a35]/20" strokeWidth={1.1} />
                           <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#526b1b]/[.16] via-[#d6f36a]/[.07] to-transparent" aria-hidden="true" />
                           <div className="relative z-10">

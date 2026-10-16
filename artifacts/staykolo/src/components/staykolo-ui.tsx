@@ -25,6 +25,7 @@ export function Logo() {
 
 const navItems = [
   { href: '/search', label: 'Find a PG' },
+  { href: '/bengaluru-guide', label: 'Bengaluru Guide' },
   { href: '/blogs', label: 'Blogs' },
   { href: '/faq', label: 'FAQs' },
   { href: '/contact', label: 'Contact Us' },
@@ -125,6 +126,7 @@ export function SiteFooter() {
       <p>Clearer PG listings, right here in Bengaluru.</p>
       <nav className="flex flex-wrap gap-x-5 gap-y-2 font-semibold" aria-label="Footer links">
         <Link href="/search" className="hover:text-[#1b1d18]">Find a stay</Link>
+        <Link href="/bengaluru-guide" className="hover:text-[#1b1d18]">Bengaluru Guide</Link>
         <Link href="/blogs" className="hover:text-[#1b1d18]">Blogs</Link>
         <Link href="/faq" className="hover:text-[#1b1d18]">FAQs</Link>
         <Link href="/contact" className="hover:text-[#1b1d18]">Contact</Link>
